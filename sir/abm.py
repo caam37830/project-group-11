@@ -65,7 +65,7 @@ def remove_pop(pop, k):
     infected = get_indices(pop, 'I')
 
     # Determine the rounded number of infected to remove
-    removals = np.floor(len(infected) * k)
+    removals = np.int(np.floor(len(infected) * k))
 
     # Remove k proportion of infected
     for i in random.sample(infected, removals):
@@ -85,7 +85,7 @@ def infect_pop(pop, b):
     for i in infected:
 
         # Identify the b interactions for this agent
-        receivers = np.randint(pop_size, size=b)
+        receivers = random.sample(range(0,pop_size), b)
 
         for j in receivers:
             pop[j].infect()
