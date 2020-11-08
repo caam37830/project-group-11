@@ -13,4 +13,4 @@ ode_covid.solve(t_bound=365)
 # plot the numerical solution
 ode_covid.plot()
 # s, i, r of day 150
-print(ode_covid(150))
+print(ode_covid(100))
