@@ -57,7 +57,7 @@ class covid():
 
         y0 = np.array([self.s, self.i, self.r])
         t_span = (0, t_bound)
-        t_eval = range(1, t_bound+1, h)
+        t_eval = range(0, t_bound, h)
 
         self.sol = solve_ivp(fun, t_span, y0=y0, t_eval=t_eval, dense_output=True, **kwargs)
 
