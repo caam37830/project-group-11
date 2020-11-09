@@ -1,13 +1,24 @@
 import unittest
 from sir.ode import *
+from sir.abm import *
 
 class TestABM(unittest.TestCase):
     def setUp(self):
         pass
 
-    def test_something(self):
-        self.assertEqual(True, False)
+    def test_Remove(self):
 
+        infected_Test = Person('I')
+        infected_Test.remove()
+
+        self.assertEqual(infected_Test.cur_state(), 'R')
+
+    def test_Infect(self):
+
+        suscept_Test = Person('S')
+        suscept_Test.infect()
+
+        self.assertEqual(suscept_Test.cur_state(), 'I')
 
 class TestODE(unittest.TestCase):
     def setUp(self):
