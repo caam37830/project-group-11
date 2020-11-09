@@ -4,11 +4,19 @@ import sympy as sym
 import matplotlib.pyplot as plt
 
 class covid():
-    def __init__(self, S, I ,R, b, k, **kwargs):
+    def __init__(self, S, I, R, b, k, **kwargs):
+        """
+        initialize class with initial values for each compartment
+
+        b is number of interactions per individual per day
+        k is fraction of infectious period which recovers each day (0 < k < 1)
+        """
         # todo 1. here I introduce **kwargs for further variations
         assert type(S) == int, 'S should be int'
         assert type(I) == int, 'I should be int'
         assert type(R) == int, 'R should be int'
+        assert b > 0, 'b must be a positive number'
+        assert (k > 0 and k < 1), 'k must be between 0 and 1' 
 
         self.S = S
         self.I = I
@@ -31,7 +39,7 @@ class covid():
         """
         # raise error if the solve method has not ran
         if self.sol is None:
-            raise AssertionError('covid class is callable after use solve method')
+            raise AssertionError('Covid class is callable only after solve has been run')
 
         return self.sol.sol(t)
 
@@ -57,7 +65,7 @@ class covid():
 
         y0 = np.array([self.s, self.i, self.r])
         t_span = (0, t_bound)
-        t_eval = range(1, t_bound+1, h)
+        t_eval = np.arange(0, t_bound, h)
 
         self.sol = solve_ivp(fun, t_span, y0=y0, t_eval=t_eval, dense_output=True, **kwargs)
 
@@ -82,4 +90,8 @@ class covid():
         """
         pass
 
+if __name__ == '__main__':
+    covid_sim = covid(S = 10000, I = 20, R = 0, b = 3.4, k = 0.3)
+    covid_sim.solve(t_bound=50)
+    covid_sim.plot()
 
