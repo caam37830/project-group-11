@@ -89,9 +89,3 @@ class covid():
         under some condition, the society take some actions, then solve the problem.
         """
         pass
-
-if __name__ == '__main__':
-    covid_sim = covid(S = 10000, I = 20, R = 0, b = 3.4, k = 0.3)
-    covid_sim.solve(t_bound=50)
-    covid_sim.plot()
-
