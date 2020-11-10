@@ -4,6 +4,11 @@ import sympy as sym
 import matplotlib.pyplot as plt
 
 class covid():
+    """
+    A population in which Covid is present
+
+    Methods for projecting and visualizing the trajectory given certain parameters are implemented
+    """
     def __init__(self, S, I, R, b, k, **kwargs):
         """
         initialize class with initial values for each compartment
