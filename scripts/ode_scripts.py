@@ -1,4 +1,4 @@
-from sir.ode import covid
+from ode import covid
 
 # init population
 N = 1_000_000
@@ -7,7 +7,7 @@ R = 0
 S = N - I - R
 
 # init the covid class
-ode_covid = covid(S, I, R, k=0.05, b=3)
+ode_covid = covid(S, I, R, k=0.1, b=3)
 # solve that class
 ode_covid.solve(t_bound=365)
 # plot the numerical solution
