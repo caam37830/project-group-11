@@ -1,5 +1,8 @@
 import numpy as np
 import random
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+from tqdm import trange
 
 class Person():
     """
@@ -54,7 +57,7 @@ def abm_pop_sim(pop, b, k, t):
     I = []
     R = []
 
-    for i in range(t):
+    for i in trange(t):
         pop = remove_pop(pop, k)
         pop = infect_pop(pop, b)
         S.append(len(get_indices(pop, 'S')))
@@ -99,10 +102,84 @@ def infect_pop(pop, b):
     return pop
 
 
-
 def get_indices(pop, state):
     """
     Finds the population agents with a given state
     """
     indices = [i for i, agent in enumerate(pop) if agent.cur_state() == state]
     return indices
+
+def abm_phase(N, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=np.linspace(0.01, .5, 10), save_path=None):
+    """
+    plot phase diagram
+    :param N: starting population
+    :param infected: starting infected count
+    :param t: time
+    :param bs: discrete b
+    :param ks: discrete k
+    :param save_path:
+    :return:
+    """
+    # store initial state of pop for future use
+    cts = np.zeros((len(bs), len(ks)))
+
+    for i, b in enumerate(bs):
+        # ensure b is an int, not a float
+        for j, k in enumerate(ks):
+            pop = new_pop(N, infected)
+            pop, S, I, R = abm_pop_sim(pop, b, k, t)
+            cts[i, j] = np.true_divide(I[-1], N)
+
+
+    # Create a phase plot
+    fig, ax = plt.subplots()
+    axcontour = ax.contour(ks, bs, cts)
+    fig.colorbar(axcontour)
+    ax.set_title('phase diagram [I, t={}]'.format(t))
+    ax.set_xlabel('k')
+    ax.set_ylabel('b')
+
+    # Save plot
+    if save_path is not None:
+        fig.savefig(save_path)
+    plt.show()
+
+def new_pop(N, infected):
+    """
+    Create an initial state population
+    :param N: population size
+    :param infected: count of infected initial state
+    """
+    # Create a population of susceptibles
+    pop = [Person() for i in range(N)]
+
+    # Infect a given number of the population
+    for i in range(infected):
+        pop[i].infect()
+    return pop
+
+
+def time_plot(pop, b, k, t, save_path):
+    """
+    Runs a simulation with the given parameters and 
+    Outputs a plot of the three state ratios over time t
+    """
+    N = len(pop)
+    pop, S, I, R = abm_pop_sim(pop, b, k, t)
+
+    s = np.true_divide(S, N)
+    i = np.true_divide(I, N)
+    r = np.true_divide(R, N)
+
+    # plot pop sim data
+    t = np.linspace(1,t,t)
+    plt.plot(t, s, label='Susceptible', color='green')
+    plt.plot(t, i, label='Infectious', color='red')
+    plt.plot(t, r, label='Removed', color='blue')
+    plt.title("SIR ABM Simulation, b={},k={}".format(b, k))
+    plt.ylabel("ratio")
+    plt.xlabel("day")
+    plt.legend()
+    if save_path is not None:
+            plt.savefig(save_path)
+    plt.show()

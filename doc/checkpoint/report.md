@@ -13,24 +13,21 @@ The `test` folder contains the script `test.py` which can be run using `unittest
 Scripts used for generating the phase diagrams and simulation results presented later in this report are held in the `sctipts` folder.
 
 ## Results
-### Agent-Based Model (Discrete Model)
+In our phase diagrams, we can see that higher values of b will lead to higher rates of population infection for any rate of removal k at low t-values. Once we start evaluating population rates at higher values of t, we see smaller rates of infection for high b values as the infection has spread rapidly and lead to a large removed population by the time t at which we evaluate.
+
+Additionally, our phase diagrams show that the ABM model largely coincides with #### Todo, explain this relationship
+
+### Phase Diagrams
+Ordinary Differential Equation Model (Continuous Model) | Agent-Based Model (Discrete Model) 
+-|-
+![](figures/phase_diagram1.png) | ![](figures/abm_phase_diagram1.png)
+![](figures/phase_diagram2.png) | ![](figures/abm_phase_diagram2.png)
+![](figures/phase_diagram3.png) | ![](figures/abm_phase_diagram3.png)
 
 
-### Ordinary Differential Equation Model (Continuous Model)
+### todo answer questions
 
-Some phase diagrams.
-
-t=5, `Infectious`
-![](figures/phase_diagram1.png)
-
-t=10, `Infectious`
-![](figures/phase_diagram2.png)
-
-t=50, `Infectious`
-![](figures/phase_diagram3.png)
-
-Some time figures.
-
+### Time Plots of S, I, R
 b=3, k=0.01
 ![](figures/ode1.png)
 

@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../")
 from sir.ode import covid, phase_plot
 
 # init population
