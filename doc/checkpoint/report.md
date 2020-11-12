@@ -18,6 +18,27 @@ Scripts used for generating the phase diagrams and simulation results presented 
 
 ### Ordinary Differential Equation Model (Continuous Model)
 
+Some phase diagrams.
+
+t=5, `Infectious`
+![](figures/phase_diagram1.png)
+
+t=10, `Infectious`
+![](figures/phase_diagram2.png)
+
+t=50, `Infectious`
+![](figures/phase_diagram3.png)
+
+Some time figures.
+
+b=3, k=0.01
+![](figures/ode1.png)
+
+b=3, k=0.1
+![](figures/ode2.png)
+
+b=0.8, k=0.01
+![](figures/ode3.png)
 
 ## Possible Extensions/ Variations
 ### Allow for different rates of interaction between certain individuals
