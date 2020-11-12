@@ -1,6 +1,5 @@
 from scipy.integrate import solve_ivp
 import numpy as np
-import sympy as sym
 import matplotlib.pyplot as plt
 
 class covid():
@@ -21,7 +20,7 @@ class covid():
         assert type(I) == int, 'I should be int'
         assert type(R) == int, 'R should be int'
         assert b > 0, 'b must be a positive number'
-        assert (k > 0 and k < 1), 'k must be between 0 and 1' 
+        assert (k > 0 and k < 1), 'k must between 0 and 1'
 
         self.S = S
         self.I = I
@@ -76,9 +75,9 @@ class covid():
 
         return self.sol
 
-    def plot(self):
+    def plot(self, save_path=None):
         """
-        integrate plot related lines
+        plot simulation
         """
         plt.plot(self.sol.t, self.sol.y[0], label='Susceptible', color='green')
         plt.plot(self.sol.t, self.sol.y[1], label='Infectious', color='red')
@@ -87,6 +86,8 @@ class covid():
         plt.ylabel("ratio")
         plt.xlabel("day")
         plt.legend()
+        if save_path is not None:
+            plt.savefig(save_path)
         plt.show()
 
     def event_solve(self):
@@ -94,3 +95,46 @@ class covid():
         under some condition, the society take some actions, then solve the problem.
         """
         pass
+
+def phase_plot(N, I, R, t, phase='I', bs=np.linspace(1, 10, 50), ks=np.linspace(0.01, .5, 50), save_path=None):
+    """
+    plot phase diagram
+    :param N: total number of population
+    :param I: infected number of poplation
+    :param R: removed number of population
+    :param t: time
+    :param phase: plot which parameter's phase
+    :param bs: discrete b
+    :param ks: discrete k
+    :param save_path:
+    :return:
+    """
+    idx = 0
+    if phase == 'I':
+        idx = 1
+    elif phase == 'R':
+        idx = 2
+    else:
+        idx = 0
+
+    cts = np.zeros((len(bs), len(ks)))
+    for i, b in enumerate(bs):
+        for j, k in enumerate(ks):
+            ode_covid = covid(S=N-I-R, I=I, R=R, b=b, k=k)
+            ode_covid.solve(t_bound=t)
+            cts[i, j] = ode_covid.sol.y[idx, -1]
+
+    fig, ax = plt.subplots()
+    axcontour = ax.contour(ks, bs, cts)
+    fig.colorbar(axcontour)
+    ax.set_title('phase diagram [{}, t={}]'.format(phase ,t))
+    ax.set_xlabel('k')
+    ax.set_ylabel('b')
+
+    # plt.contour(ks, bs, cts)
+    # plt.xlabel('k')
+    # plt.ylabel('b')
+    # plt.title()
+    if save_path is not None:
+        fig.savefig(save_path)
+    plt.show()
