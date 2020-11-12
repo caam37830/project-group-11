@@ -3,18 +3,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Create base pop with 0.1% infected rate
-N = 100_000
-def newpop():
+
+def newpop(N, I0):
+    """
+    Creates a population of size N with I0 initial infected cases
+    """
     pop = [Person() for i in range(N)]
-    for i in range(100):
+    for i in range(I0):
         pop[i].infect()
     return pop
 
-# Set b and k variables, get pop sim data
+# Pre-compile with a small population to enable jit functionality
+pop = newpop(100, 2)
+abm_pop_sim(pop, b=3, k=0.1, t=10)
+
+# Set population and disease paramters, get pop sim data
+N = 1000
+I0 = 10
 b = 3
 k = 0.1
 
-pop = newpop()
+pop = newpop(N, I0)
 pop, S, I, R = abm_pop_sim(pop, b, k, 100)
 
 s = np.true_divide(S, N)
@@ -35,13 +44,13 @@ plt.show()
 
 
 # Code for phase plot
-bs = np.linspace(1, 49, 50)
-ks = np.linspace(0.01,.5, 10)
+bs = np.arange(1, 10, 0.5)
+ks = np.linspace(0.01,.5, 50)
 
 cts = np.zeros((len(bs), len(ks)))
 for i, b in enumerate(bs):
     for j, k in enumerate(ks):
-        pop = newpop()
+        pop = newpop(N, I0)
         pop, S, I, R = abm_pop_sim(pop, np.int(b), k, 25)
         cts[i,j] = np.true_divide(len(I), N)
 
