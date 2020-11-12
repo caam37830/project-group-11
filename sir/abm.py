@@ -104,25 +104,6 @@ def infect_pop(pop, b):
             pop[j].infect()
 
     return pop
-    
-@jit
-def abm_pop_sim(pop, b, k, t):
-    """
-    Simulate the spread of a disease on a given population over t days.
-    pop designates the starting state, b and k control the spread and recovery rate
-    """
-    S = []
-    I = []
-    R = []
-
-    for i in range(t):
-        pop = remove_pop(pop, k)
-        pop = infect_pop(pop, b)
-        S.append(len(get_indices(pop, 'S')))
-        I.append(len(get_indices(pop, 'I')))
-        R.append(len(get_indices(pop, 'R')))
-
-    return pop, S, I, R
 
 
 def get_indices(pop, state):
