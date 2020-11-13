@@ -57,8 +57,8 @@ def abm_pop_sim(pop, b, k, t):
     R = []
 
     for i in range(t):
-        pop = remove_pop(pop, k)
         pop = infect_pop(pop, b)
+        pop = remove_pop(pop, k)
         S.append(len(get_indices(pop, 'S')))
         I.append(len(get_indices(pop, 'I')))
         R.append(len(get_indices(pop, 'R')))
