@@ -13,9 +13,12 @@ The `test` folder contains the script `test.py` which can be run using `unittest
 Scripts used for generating the phase diagrams and simulation results presented later in this report are held in the `sctipts` folder.
 
 ## Results
-In our phase diagrams, we can see that higher values of b will lead to higher rates of population infection for any rate of removal k at low t-values. Once we start evaluating population rates at higher values of t, we see smaller rates of infection for high b values as the infection has spread rapidly and lead to a large removed population by the time t at which we evaluate.
+In our phase diagrams, we can see that higher values of b will lead to higher rates of population infection for any rate of removal k at low t-values. Once we start evaluating population rates at higher values of t (see t=10), we see that the highest rates of infected population come with more middling values of b. High b values will spread the disease faster, but will also lead to a faster removal rate. Thus, the way a disease maintains a steady infected population through higher t values is with a more meager spreading rate b.
 
-Additionally, our phase diagrams show that the ABM model largely coincides with #### Todo, explain this relationship
+Additionally, our phase diagrams show us a few differences between the AMB and ODE model. The ABM (discrete) is based on random interaction between a population of agents. This randomness leads to heavy volatility in the ratios of Susceptible/Infected/Removed that is not present in the purity of the ODE (continuous) model's mathematical solution. Futher, the ODE model has synchronous removal and infection rates, while the ABM treats these two as asynchronous actions -- only removing a proportion of the infected population after the disease has been spread further for that day.
+These two factors lead the discrete model to output much more jagged phase plots than the smooth ODE counterparts. However, as t increases, the volatility of ABM flattens out and the phase plots begin to agree/converge to the ODE's mathematical solutions.
+
+
 
 ### Phase Diagrams
 Ordinary Differential Equation Model (Continuous Model) | Agent-Based Model (Discrete Model) 
@@ -25,7 +28,7 @@ Ordinary Differential Equation Model (Continuous Model) | Agent-Based Model (Dis
 ![](figures/phase_diagram3.png) | ![](figures/abm_phase_diagram3.png)
 
 
-### todo answer questions
+The only way for a simulation to reach a completely infected populace is to have a removal proportion (k) of 0. Otherwise, we see that higher rates of k deteriorate the infected population faster and faster. 
 
 ### Time Plots of S, I, R
 b=3, k=0.01
