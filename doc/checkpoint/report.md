@@ -75,35 +75,39 @@ This exercise is primarily simulation-focused. However, if we want to attempt to
 3. https://www.alberta.ca/stats/covid-19-alberta-statistics.htm 
 
 ### Use agent-based modelling to show the effect of (incomplete) mask usage
-Suppose agents are separated into two 'types': those who wear masks and those who don't. Wearing a mask reduces the risk of spreading Covid-19 (conditional on being Infected) by xx% and reduces the risk of becoming Infected (conditional on being Susceptible and coming into contact with an Infected) by yy%. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results?
+#### Motivation
+Although there is broad agreement that travel restrictions and social distancing are beneficial to limit the spreading of covid-19, recommendations around face mask use are inconsistent. Some country advise to wear face mask while other don't. And in the United States, different states have different policy. Therefore to vividly show the real effect of face mask usage and the effect of different coverage of that is important to the public. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results? Will wearing face masks limit the spreading trend or will it reduce the final infection proportion of population? Can wearing face mask delay the peak time of the epidemic?
 
-In discrete method, we can define a new status 'M'. When the `agent i` wears a mask, then `b[i]` should be 0. And when a 'M' status agent receives the virus unfortunately, that agent will not be infected. Briefly speaking, when the agent decide to wear a mask, it will neither spread or receive any virus. 
+#### Changes to the Model
+Suppose agents are separated into two 'types': those who wear masks and those who don't. Wearing a mask reduces the risk of spreading Covid-19 (conditional on being Infected) by xx% and reduces the risk of becoming Infected (conditional on being Susceptible and coming into contact with an Infected) by yy%. 
 
-In continuous method, we should change the 'ordinary differential equations'. This seem very difficult. One way is to remove those population who wear masks. Then we simulate the disease spread process among the remaining population. But if we carefully consider `ODE`, we'll find it to some kind make `b` larger.
+In discrete method, we can define a new status `m_status=True` or `m_status=False` and change the function which simulate the spread process (`infect_pop` function in abm.py). 
+For each `agent i`, when `agent i` is the virus spreader, the new spread parameter `b[i]` should be `xx% * b[i]`, and when `agent i` is the virus receiver, it have `yy%` probability to become infected. 
+Briefly speaking, when the agent decide to wear a mask, it will spread or receive the covid virus at a lower probability. 
+In addition, the patient recover process does not change, so we don't need to change parameter `k`.
 
-`ds'/dt = -b * s'(t) * i'(t)`
+According to the reference paper, we can manipulate many variables. We can decide the percent of population that wearing face masks, and this percent can be a function of time and can vary among different population clusters. We can also discuss the effectiveness of face masks (our `xx%` and `yy%`)
 
-`di'/dt = b * s'(t) * i'(t) - k * i'(t)`
+#### references
+1. Worby, C.J., Chang, HH. Face mask use in the general population and optimal resource allocation during the COVID-19 pandemic. Nat Commun 11, 4049 (2020). https://doi.org/10.1038/s41467-020-17922-x
 
-`dr/dt = k * i(t)`
-
-`s' = s - intersection(m, s)`, `i'= i- intersection(m, i)` 
-
-So, we prefer to use `Agent Based Model`. We do not need data for this extension.
 
 ### Adding a compartment for "Exposed" individuals, turning the model into the SEIR model
-Suppose there is a policy for individuals to voluntarily quarantine themselves if they believe they have been exposed to the virus. Then suppose being in quarantine reduces the number of interactions that that individual has. Could potentially make the rate at which individuals enter the Exposed category a function of Covid-19 cases to simulate the several waves of the virus that we are experiencing.
+#### motivation
+Suppose there is a policy for individuals to voluntarily quarantine themselves if they believe they have been exposed to the virus. Then suppose being in quarantine reduces the number of interactions that that individual has. 
+When considering this model, we want to investigate several questions.
+Could potentially make the rate at which individuals enter the Exposed category a function of Covid-19 cases to simulate the several waves of the virus that we are experiencing? 
+Is this policy really useful in term of controlling the pandemic? reduce total infection or reduce total death? smooth the breakout to ease hospital pressure?
+If this policy is proved effective to control the pandemic, what is the best length of quarantine (tradeoff of cost and benefit)?
 
-[comment]: <> (<br> here is to add a new line, use<img> to add formulas in markdown file)
-<img src="https://latex.codecogs.com/svg.latex? \frac{dS}{dt} = \Lambda N - \mu S - \frac{\beta I S}{N}"/>
-<br> 
-<img src="https://latex.codecogs.com/svg.latex? \frac{dE}{dt} = \frac{\beta I S}{N} - (\mu +a ) E"/>
-<br>
-<img src="https://latex.codecogs.com/svg.latex? \frac{dI}{dt} = a E - (\gamma +\mu ) I"/>
-<br>
-<img src="https://latex.codecogs.com/svg.latex? \frac{dR}{dt} = \gamma I  - \mu R"/>
 
-We have`S + E + I + R = N`, <img src="https://latex.codecogs.com/svg.latex? \Lambda" /> is birth rate, <img src="https://latex.codecogs.com/svg.latex? \mu" /> is death rate.
+#### Changes to the model
+For continuous ordinary differential equation, we can change the equations to below(4).
+![](figures/SEIR%20equations.png)
+
+
+
+We have`S + E + I + R = N`, $\Lambda$ is birth rate, <img src="https://latex.codecogs.com/svg.latex? \mu" /> is death rate.
 
 According to the equations above, we can use continous method by changing the rhs function and discrete method by add a new status and some operation functions.
 
