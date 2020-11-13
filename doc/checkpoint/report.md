@@ -36,6 +36,8 @@ Ordinary Differential Equation Model (Continuous Model) | Agent-Based Model (Dis
 
 The only way for a simulation to reach a completely infected populace is to have a removal proportion (k) of 0. Otherwise, we see that higher rates of k deteriorate the infected population faster and faster. 
 
+Also, we can see that for low _t_, the contour lines show that as `b` approaches certain levels, it requires very large increases in `k` to prevent the infection rate from skyrocketing. But, as `b` gets very large (beyond the level that causes a spike), the level of `k` required actually begins to decrease. This results from the fact that the phase diagrams fix the time, `t`, and so if `b` is too high, and the infection lasts for a relatively short time, then many infections will resolve before `t`. Meanwhile, if `b` is relatively small, then even small increases in `b` will cause the number of cases at time `t` to increase a lot if the recovery time, `k` is relatively longer.
+
 ### Time Plots of S, I, R
 b=3, k=0.01
 ![](figures/ode1.png)
