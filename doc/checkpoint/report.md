@@ -5,7 +5,7 @@ The SIR model is a compartmental epidemiological model which assumes everyone in
 
 The trajectory of the disease generally depends on the parameters `b`, the per capita number of interactions capable of spreading the disease that occur per day, and `k`, the rate at which Infected individuals move into the Removed compartment. Notably, the basic SIR model assumes that all agents in the population interact randomly so every Susceptible individual shares an equal chance of becoming infected in each period. I.e. the probability for any given Susceptible individual to become infected in a period is `b * I/N`. Additionally, `k` can be interpreted as the reciprocal of the mean duration of infection when duration of infections are exponentially distributed (1). For Covid-19, no conclusive figure has been established as the mean duration of infection. However, the US CDC estimates that the majority of cases become no longer infectious within 10 days, though some serious cases can remain infectious for up to 20 days (2). 
 
-From the dicussion above, we can note that for any period, we can predict if the infection will continue to spread or being to decrease in the next period. Since the (expected) number of new infections can be given by `S * b * I/N` and the (expected) number of removals is given by `k * I`, if the ratio of the two, `(S * b) / (k*N) > 1` then the infection will continue to spread since the number of new infections outpaces the number of recoveries; whereas if `(S * b) / k*N) < 1`, the number of recoveries exceed te number of infections and so the infection will begin to die out on its own. Within epidemiolgy, this relationship is commonly known as the 'effective reproduction number'.
+From the dicussion above, we can note that for any period, we can predict if the infection will continue to spread or being to decrease in the next period. Since the (expected) number of new infections can be given by `S * b * I/N` and the (expected) number of removals is given by `k * I`, if the ratio of the two, `(S * b) / (k*N) > 1` then the infection will continue to spread since the number of new infections outpaces the number of recoveries; whereas if `(S * b) / k*N) < 1`, the number of recoveries exceed te number of infections and so the infection will begin to die out on its own. Within epidemiolgy, this relationship is commonly known as the 'effective reproduction number' (3).
 
 ## Structure of the `sir` Package
 This version of the `sir` package contains implementations of classes that facilitate analysing the trajectory of Covid-19 using the SIR model. The `sir` folder currently contains a module for agent-based modeling, `abm`, as well as a module for modeling as a system of ordinary differential equations, `ode`. 
@@ -45,7 +45,29 @@ b=0.8, k=0.01
 
 ## Possible Extensions/ Variations
 ### Allow for different rates of interaction between certain individuals
+#### Motivation
 This could apply to situations such as within-household transmission versus across-household transmission. The aim of this extension would be to relax the assumption that all members of a population interact with each other at a constant rate. It is easy to imagine that the rate of interaction between family members or neighbors tends to be much higher than the rate of interaction between strangers.
+
+A hypothesis that could be tested is that even with very little social interaction with strangers ("outside interaction"), Covid could propagate quickly and widely if within-household interaction ("local interaction") remains relatively high. By simulating a Covid trajectory with both local and outside interaction, and then plotting a phase plane, we could see how the different types of interaction contribute to Covid spread.
+
+Another hypothesis is that differences in social structures will cause some individuals to be much more likely to be infected than others. This can be tested by running the simulation and examining the resulting pattern of infection (i.e. who is an isn't infected) after a given time period. More on this is explained in the following subsection.
+
+#### Changes to the Model
+An agent-based model of this could incorporate something similar to the 'game of life' previously examined in this course. That is, we assume all individuals live on a grid and we create 'neighbors' for each individual with whom the individual has a relatively high proabability of meeting every day. Meanwhile, the individual meets non-neighbors at a much lower probability every day. Again, we would assume that interaction with an infected individual causes susceptible individuals to become infected and they do not quarantine upon infection but gain immunity following infection. Based on the hypothesis above, we would expect to see that individuals closer to the center of the grid have a higher probability of being infected because they are, on average, closer in terms of number of degrees of social separation to every other individual than those closer to the edges of the grid. Ideally, a visualization of a sparse matrix could be generated to see this. Or, we could run the simulation multiple times and count the number of times each individual was infected and create a "heatmap" of infection probabilities.
+
+A potentially similar change that could be implemented as a system of ODEs would be to assume that there are a finite number of groups or categories of people, which each has a different level of susceptibility and model accordingly. This would be the Differential Susceptibility SIR (DS-SIR) model (1). The resulting system of differential equations would be represented by the following diagram from (1). In this case, we could check several variations of distributions of susceptibilities that all have the same overall average susceptibility/ transmission rate and see how or if the trajectory of the disease changes.
+
+![](figures/ds-sir.png)
+
+
+#### Data
+This exercise is primarily simulation-focused. However, if we want to attempt to test the model against real-world data, we could use data from Alberta, Canada. Alberta recently implemented a controversial "cohort system" of Covid-19 control in which each individual is allowed to have a "core cohort" within which they have relatively broad freedom to interact but must otherwise maintain social distancing when in public (2). Data on Alberta's Covid-19 cases is freely available online (3). This data could be used to help estimate sensible parameters and/or test the predictive power of the expanded model.
+
+
+#### Extension-Specific References
+1. Ma, Z., \& Li, J. (2009). Basic Knowledge and Modeling on Epidemic Dynamics. In Dynamical Modeling and Analysis of Epidemics (pp. 1-82). Singapore: World Scientific.
+2. https://www.alberta.ca/restrictions-on-gatherings.aspx
+3. https://www.alberta.ca/stats/covid-19-alberta-statistics.htm 
 
 ### Use agent-based modelling to show the effect of (incomplete) mask usage
 Suppose agents are separated into two 'types': those who wear masks and those who don't. Wearing a mask reduces the risk of spreading Covid-19 (conditional on being Infected) by xx% and reduces the risk of becoming Infected (conditional on being Susceptible and coming into contact with an Infected) by yy%. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results?
@@ -61,3 +83,4 @@ Assume a vaccine comes out that grants temporary immunity to Covid-19. Further a
 ## References:
 1. Martcheva, M. (2015). An introduction to mathematical epidemiology. Heidelberg, New York: Springer. doi:10.1007/978-1-4899-7612-3
 2. Clinical Questions about COVID-19: Questions and Answers. (n.d.). Retrieved November 09, 2020, from https://www.cdc.gov/coronavirus/2019-ncov/hcp/faq.html
+3. Rodpothong, P., \& Auewarakul, P. (2012). Viral evolution and transmission effectiveness. World Journal of Virology, 1(5), 131. doi:10.5501/wjv.v1.i5.131
