@@ -45,6 +45,9 @@ ODE (Continuous Model)| Agent-Based Model (Discrete Model)
 <img src="figures/ode2.png" alt="ode2" width="480" height = "240"/> | <img src="figures/abm2.png" alt="abm2" width="480" height = "240"/>
 <img src="figures/ode3.png" alt="ode3" width="480" height = "240"/> | <img src="figures/abm3.png" alt="abm3" width="480" height = "240"/>
 
+Here, we can see that as expected, the ODE and ABM models generate very similar plots. This confirms that the ODE SIR model does a very good job of approximating the "real" situation which is modeled more literally by the ABM. This is good news because the ODE version of the model is noticeably faster than the ABM model. So, we can use the ODE model to give us the same results as what we would expect from an ABM model for large populations with a much faster computation time. The ODE model also offers the additional advantage of being able to specify non-integer values of `b`. 
+
+
 ## 4. Possible Extensions/ Variations
 ### 4.1 Allow for different rates of interaction between certain individuals
 #### Motivation
