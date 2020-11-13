@@ -39,17 +39,11 @@ The only way for a simulation to reach a completely infected populace is to have
 Also, we can see that for low _t_, the contour lines show that as `b` approaches certain levels, it requires very large increases in `k` to prevent the infection rate from skyrocketing. But, as `b` gets very large (beyond the level that causes a spike), the level of `k` required actually begins to decrease. This results from the fact that the phase diagrams fix the time, `t`, and so if `b` is too high, and the infection lasts for a relatively short time, then many infections will resolve before `t`. Meanwhile, if `b` is relatively small, then even small increases in `b` will cause the number of cases at time `t` to increase a lot if the recovery time, `k` is relatively longer.
 
 ### 3.2 Time Plots of S, I, R
-*b=3, k=0.01*
-
-<img src="figures/ode1.png" alt="ode1" width="480" height = "240"/>  <img src="figures/abm1.png" alt="abm1" width="480" height = "240"/>
-
-*b=3, k=0.1*
-
-<img src="figures/ode2.png" alt="ode2" width="480" height = "240"/>  <img src="figures/abm2.png" alt="abm2" width="480" height = "240"/>
-
-*b=0.8, k=0.01*
-
-<img src="figures/ode3.png" alt="ode3" width="480" height = "240"/>  <img src="figures/abm3.png" alt="abm3" width="480" height = "240"/>
+ODE (Continuous Model)| Agent-Based Model (Discrete Model)
+-|- 
+<img src="figures/ode1.png" alt="ode1" width="480" height = "240"/> | <img src="figures/abm1.png" alt="abm1" width="480" height = "240"/>
+<img src="figures/ode2.png" alt="ode2" width="480" height = "240"/> | <img src="figures/abm2.png" alt="abm2" width="480" height = "240"/>
+<img src="figures/ode3.png" alt="ode3" width="480" height = "240"/> | <img src="figures/abm3.png" alt="abm3" width="480" height = "240"/>
 
 ## 4. Possible Extensions/ Variations
 ### 4.1 Allow for different rates of interaction between certain individuals
