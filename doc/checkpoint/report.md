@@ -39,14 +39,17 @@ The only way for a simulation to reach a completely infected populace is to have
 Also, we can see that for low _t_, the contour lines show that as `b` approaches certain levels, it requires very large increases in `k` to prevent the infection rate from skyrocketing. But, as `b` gets very large (beyond the level that causes a spike), the level of `k` required actually begins to decrease. This results from the fact that the phase diagrams fix the time, `t`, and so if `b` is too high, and the infection lasts for a relatively short time, then many infections will resolve before `t`. Meanwhile, if `b` is relatively small, then even small increases in `b` will cause the number of cases at time `t` to increase a lot if the recovery time, `k` is relatively longer.
 
 ### 3.2 Time Plots of S, I, R
-b=3, k=0.01
-![](figures/ode1.png)
+*b=3, k=0.01*
 
-b=3, k=0.1
-![](figures/ode2.png)
+<img src="figures/ode1.png" alt="ode1" width="500" height = "400"/> | <img src="figures/abm1.png" alt="abm1" width="500" height = "400"/>
 
-b=0.8, k=0.01
-![](figures/ode3.png)
+*b=3, k=0.1*
+
+<img src="figures/ode2.png" alt="ode2" width="500" height = "400"/> | <img src="figures/abm2.png" alt="abm2" width="500" height = "400"/>
+
+*b=0.8, k=0.01*
+
+<img src="figures/ode3.png" alt="ode3" width="500" height = "400"/> | <img src="figures/abm3.png" alt="abm3" width="500" height = "400"/>
 
 ## 4. Possible Extensions/ Variations
 ### 4.1 Allow for different rates of interaction between certain individuals
@@ -69,19 +72,19 @@ A potentially similar change that could be implemented as a system of ODEs would
 This exercise is primarily simulation-focused. However, if we want to attempt to test the model against real-world data, we could use data from Alberta, Canada. Alberta recently implemented a controversial "cohort system" of Covid-19 control in which each individual is allowed to have a "core cohort" within which they have relatively broad freedom to interact but must otherwise maintain social distancing when in public (2). Data on Alberta's Covid-19 cases is freely available online (3). This data could be used to help estimate sensible parameters and/or test the predictive power of the expanded model.
 
 
-#### Extension-Specific References
+#### Specific References
 1. Ma, Z., \& Li, J. (2009). Basic Knowledge and Modeling on Epidemic Dynamics. In Dynamical Modeling and Analysis of Epidemics (pp. 1-82). Singapore: World Scientific.
 2. https://www.alberta.ca/restrictions-on-gatherings.aspx
 3. https://www.alberta.ca/stats/covid-19-alberta-statistics.htm 
 
 ### 4.2 Use agent-based modelling to show the effect of (incomplete) mask usage
 #### Motivation
-Although there is broad agreement that travel restrictions and social distancing are beneficial to limit the spreading of covid-19, recommendations around face mask use are inconsistent. Some country advise to wear face mask while other don't. And in the United States, different states have different policy. Therefore to vividly show the real effect of face mask usage and the effect of different coverage of that is important to the public. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results? Will wearing face masks limit the spreading trend or will it reduce the final infection proportion of population? Can wearing face mask delay the peak time of the epidemic?
+Although there is broad agreement that travel restrictions and social distancing are beneficial to limit the spreading of covid-19, recommendations around face mask use are inconsistent. Some countries advise to wear face mask while other don't. And in the United States, different states have different policies. Therefore we want to investigate and show the effect of different extents of face mask usage. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results? Will wearing face masks limit the spreading trend or will it reduce the final infection proportion of population? Can wearing face mask delay the peak time of the epidemic?
 
 #### Changes to the Model
 Suppose agents are separated into two 'types': those who wear masks and those who don't. Wearing a mask reduces the risk of spreading Covid-19 (conditional on being Infected) by xx% and reduces the risk of becoming Infected (conditional on being Susceptible and coming into contact with an Infected) by yy%. 
 
-In discrete method, we can define a new status `m_status=True` or `m_status=False` and change the function which simulate the spread process (`infect_pop` function in abm.py). 
+In discrete methods, we can define a new status `m_status=True` or `m_status=False` and change the function which simulate the spread process (`infect_pop` function in abm.py). 
 For each `agent i`, when `agent i` is the virus spreader, the new spread parameter `b[i]` should be `xx% * b[i]`, and when `agent i` is the virus receiver, it have `yy%` probability to become infected. 
 Briefly speaking, when the agent decide to wear a mask, it will spread or receive the covid virus at a lower probability. 
 In addition, the patient recover process does not change, so we don't need to change parameter `k`.
@@ -89,52 +92,53 @@ In addition, the patient recover process does not change, so we don't need to ch
 According to the reference paper, we can manipulate many variables. We can decide the percent of population that wearing face masks, and this percent can be a function of time and can vary among different population clusters. We can also discuss the effectiveness of face masks (our `xx%` and `yy%`)
 
 #### Data
-This exercise is primarily simulation-focused. In practice we don't know when and how people wear face mask, different masks have different protection level, and we don't know the relation between cluster demographic feature and the mask coverage rate. 
-Therefore, it's hard to test model against real-world data.
+This exercise is primarily simulation-focused. In practice we don't know when and how people wear face mask, different masks have different protection level, and the relationship between demographic features and the mask coverage rate is not obvious. What we do have access to are the results of a survey conducted by New York Times in the summer of 2020 that reports county-level mask usage. This data may provide inspiration for some of the simulations we run.
 
-#### references
-Worby, C.J., Chang, HH. Face mask use in the general population and optimal resource allocation during the COVID-19 pandemic. Nat Commun 11, 4049 (2020). https://doi.org/10.1038/s41467-020-17922-x
+#### Specific References
+1. Worby, C.J., Chang, HH. Face mask use in the general population and optimal resource allocation during the COVID-19 pandemic. Nat Commun 11, 4049 (2020). https://doi.org/10.1038/s41467-020-17922-x
+2. https://github.com/nytimes/covid-19-data
 
 
 ### 4.3 Adding a compartment for "Exposed" individuals, turning the model into the SEIR model
-#### motivation
+#### Motivation
 Suppose there is a policy for individuals to voluntarily quarantine themselves if they believe they have been exposed to the virus. Then suppose being in quarantine reduces the number of interactions that that individual has. 
 When considering this model, we want to investigate several questions.
 Could potentially make the rate at which individuals enter the Exposed category a function of Covid-19 cases to simulate the several waves of the virus that we are experiencing? 
-Is this policy really useful in term of controlling the pandemic? reduce total infection or reduce total death? smooth the breakout to ease hospital pressure?
+Is this policy really useful in terms of controlling the pandemic? Does it reduce total infection and/or reduce total death? How potent are other potential benefits such as reducing hospital loads?
 If this policy is proved effective to control the pandemic, what is the best length of quarantine (tradeoff of cost and benefit)?
 
 
-#### Changes to the model
+#### Changes to the Model
 For continuous ordinary differential equation, we can change the equations to below(4).
 
 <img src="figures/SEIR%20equations.png" alt="SEIR" width="300"/>
 
-We have`S + E + I + R = N`, Lambda is birth rate, mu is death rate. So by changing RHS function, we can implement this extension.
+We have `S + E + I + R = N`, Lambda is birth rate, mu is death rate. So by changing RHS function, we can implement this extension.
 
-For discrete Agent Based Model, add a new status `E` and some operation functions, we can implement this extension.
+For discrete Agent Based Modeling, by adding a new status `E` and some operation functions, we can implement this extension.
 
 #### Data
-This variation is also simulation-focused.
+This variation is also simulation-focused. Potentially, we could try to use data on the number of Covid-19 cases in the US at the county-level(2) and phase diagrams to investigate what combinations of parameters could've led to their observed trajectory.
 
-#### reference
-https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#Variations_on_the_basic_SIR_model
+#### Specific References
+1. https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#Variations_on_the_basic_SIR_model
+2. https://github.com/nytimes/covid-19-data 
 
 ### 4.4 Assume immunity is temporary and model the effects of a vaccine that takes time to roll out/ is not universally adopted
 #### motivation
-For a long time, people give their hope to vaccine. In this extension we hope to model the pandemic trend with vaccine being continuous produced and distributed. 
+For a long time, people give their hope to vaccine. In this extension we hope to model the pandemic trend with the vaccine being continuously produced and distributed. 
 Assume a vaccine comes out that grants temporary immunity to Covid-19. Further assume that only a relatively small portion of the population is able to gain access to the vaccine in each time period. 
 How will the overall trajectory of Covid-19 look? Is there a minimum threshold for speed/ extent of vaccine adoption in order for it to be effective?
 
 #### Changes to the model
-This extension is similar to wear musks. When a person take the vaccine, he will not be infected for a while and will not spread the virus. This is the same with absolute effective mask, no worry to be infected and spread the virus. 
-When the effect of the vaccine disappears, that person will be lose that super power just like the person take off the magic mask. 
+This extension is similar to wearing masks. When a person takes the vaccine, he will not be infected for a while and will not spread the virus. This is the same with absolutely effective masks. 
+When the effect of the vaccine disappears, that person will be lose that their immunity, just like someone who stops wearing their fully effective mask. 
 
-For this variation, building an Agent Based Model is easy. We can modify the mask extension a bit by adding a time recorder to each person. When the person receive vaccine, his/her `m_status` turn to TRUE, and initial the the time recorder to be 0. 
-Check and update the time recorder each step. If it is larger than the threshold, we should turn the `m_status` to be FALSE. It's difficult to model the situation using ODE.
+For this variation, building an Agent Based Model is easy. We can modify the mask extension a bit by adding a time recorder to each person. When the person receive vaccine, his/her `m_status` turn to TRUE, and initialize the the time recorder to be 0. 
+Check and update the time recorder each step. If it is larger than the threshold, we should turn the `m_status` to be FALSE. It's difficult to model the situation explicitly using ODE. The situation could potentially be approximated using the DS-SIR model mentioned in a previous extension. 
 
 #### Data
-This exercise is also simulation-focused.
+This exercise is simulation-focused. Data is inaccessible especially because no publicly available vaccine currently exists yet.
 
 ## 5. References:
 1. Martcheva, M. (2015). An introduction to mathematical epidemiology. Heidelberg, New York: Springer. doi:10.1007/978-1-4899-7612-3
