@@ -2,7 +2,6 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from numba import jit
 
 class Person():
     """
@@ -30,7 +29,7 @@ class Person():
 
     def __repr__(self):
         return f"Person({self.state})"
-
+    
     def infect(self):
         """
         Agent catches the disease
@@ -48,7 +47,6 @@ class Person():
         if self.state == 'I':
             self.state = 'R'
 
-@jit
 def abm_pop_sim(pop, b, k, t):
     """
     Simulate the spread of a disease on a given population over t days.
@@ -67,7 +65,6 @@ def abm_pop_sim(pop, b, k, t):
 
     return pop, S, I, R
 
-@jit
 def remove_pop(pop, k):
     """
     Remove k proportion of the infected population 
@@ -84,7 +81,6 @@ def remove_pop(pop, k):
     
     return pop
 
-@jit
 def infect_pop(pop, b):
     """
     Have each infected agent interact with b others
@@ -103,7 +99,6 @@ def infect_pop(pop, b):
             pop[j].infect()
 
     return pop
-
 
 def get_indices(pop, state):
     """
