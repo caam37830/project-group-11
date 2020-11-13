@@ -2,7 +2,6 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from tqdm import trange
 from numba import jit
 
 class Person():
@@ -59,7 +58,7 @@ def abm_pop_sim(pop, b, k, t):
     I = []
     R = []
 
-    for i in trange(t):
+    for i in range(t):
         pop = remove_pop(pop, k)
         pop = infect_pop(pop, b)
         S.append(len(get_indices(pop, 'S')))
@@ -127,7 +126,7 @@ def abm_phase(N, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=np.linspac
     # store initial state of pop for future use
     cts = np.zeros((len(bs), len(ks)))
 
-    for i, b in enumerate(bs):
+    for i, b in tqdm(enumerate(bs)):
         # ensure b is an int, not a float
         for j, k in enumerate(ks):
             pop = new_pop(N, infected)
