@@ -105,6 +105,7 @@ If this policy is proved effective to control the pandemic, what is the best len
 For continuous ordinary differential equation, we can change the equations to below(4).
 ![](figures/SEIR%20equations.png)
 
+<img src="figures/SEIR%20equations.png" alt="SEIR" width="300"/>
 
 
 We have`S + E + I + R = N`, $\Lambda$ is birth rate, <img src="https://latex.codecogs.com/svg.latex? \mu" /> is death rate.
