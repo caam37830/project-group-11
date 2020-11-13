@@ -41,15 +41,15 @@ Also, we can see that for low _t_, the contour lines show that as `b` approaches
 ### 3.2 Time Plots of S, I, R
 *b=3, k=0.01*
 
-<img src="figures/ode1.png" alt="ode1" width="500" height = "400"/> | <img src="figures/abm1.png" alt="abm1" width="500" height = "400"/>
+<img src="figures/ode1.png" alt="ode1" width="480" height = "240"/>  <img src="figures/abm1.png" alt="abm1" width="480" height = "240"/>
 
 *b=3, k=0.1*
 
-<img src="figures/ode2.png" alt="ode2" width="500" height = "400"/> | <img src="figures/abm2.png" alt="abm2" width="500" height = "400"/>
+<img src="figures/ode2.png" alt="ode2" width="480" height = "240"/>  <img src="figures/abm2.png" alt="abm2" width="480" height = "240"/>
 
 *b=0.8, k=0.01*
 
-<img src="figures/ode3.png" alt="ode3" width="500" height = "400"/> | <img src="figures/abm3.png" alt="abm3" width="500" height = "400"/>
+<img src="figures/ode3.png" alt="ode3" width="480" height = "240"/>  <img src="figures/abm3.png" alt="abm3" width="480" height = "240"/>
 
 ## 4. Possible Extensions/ Variations
 ### 4.1 Allow for different rates of interaction between certain individuals
