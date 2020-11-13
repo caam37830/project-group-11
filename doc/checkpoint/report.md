@@ -1,13 +1,13 @@
 # Agent-Based and Ordinary Differential Equation Modelling of SIR Model
 
-##1. Introduction to the SIR Model
+## 1. Introduction to the SIR Model
 The SIR model is a compartmental epidemiological model which assumes everyone in a population falls into one of three compartments: Susceptible, Infectious, and Recovered (sometimes referred to instead as Removed). The Susceptible population consists of those who have not yet gotten the virus and thus are _susceptible_ to becoming infected. Infectious individuals are those who carry the virus and are capable of infecting others for some period of time before eventually transitioning into the Removed group. Lastly, Removed individuals are those who are no longer part of the system because they have either acquired immunity or died from the disease. 
 
 The trajectory of the disease generally depends on the parameters `b`, the per capita number of interactions capable of spreading the disease that occur per day, and `k`, the rate at which Infected individuals move into the Removed compartment. Notably, the basic SIR model assumes that all agents in the population interact randomly so every Susceptible individual shares an equal chance of becoming infected in each period. I.e. the probability for any given Susceptible individual to become infected in a period is `b * I/N`. Additionally, `k` can be interpreted as the reciprocal of the mean duration of infection when duration of infections are exponentially distributed (1). For Covid-19, no conclusive figure has been established as the mean duration of infection. However, the US CDC estimates that the majority of cases become no longer infectious within 10 days, though some serious cases can remain infectious for up to 20 days (2). 
 
 From the dicussion above, we can note that for any period, we can predict if the infection will continue to spread or being to decrease in the next period. Since the (expected) number of new infections can be given by `S * b * I/N` and the (expected) number of removals is given by `k * I`, if the ratio of the two, `(S * b) / (k*N) > 1` then the infection will continue to spread since the number of new infections outpaces the number of recoveries; whereas if `(S * b) / k*N) < 1`, the number of recoveries exceed te number of infections and so the infection will begin to die out on its own. Within epidemiolgy, this relationship is commonly known as the 'effective reproduction number' (3).
 
-##2. Structure of the `sir` Package
+## 2. Structure of the `sir` Package
 This version of the `sir` package contains implementations of classes that facilitate analysing the trajectory of Covid-19 using the SIR model. The `sir` folder currently contains a module for agent-based modeling, `abm`, as well as a module for modeling as a system of ordinary differential equations, `ode`. 
 
 The `test` folder contains the script `test.py` which can be run using `unittest` or `pytest` to verify the integrity of the `abm` and `ode` modules. The test is also continuously integrated using GitHub Actions. 
@@ -18,7 +18,7 @@ The `doc` folder which contains the `checkpoint` subfolder which contains this r
 
 The `LICENSE`, `requirements`, and `setup` files are contained in the main directory so as to facilitate easy installation and use of this package.
 
-##3. Results
+## 3. Results
 In our phase diagrams, we can see that higher values of b will lead to higher rates of population infection for any rate of removal k at low t-values. Once we start evaluating population rates at higher values of t (see t=10), we see that the highest rates of infected population come with more middling values of b. High b values will spread the disease faster, but will also lead to a faster removal rate. Thus, the way a disease maintains a steady infected population through higher t values is with a more meager spreading rate b.
 
 Additionally, our phase diagrams show us a few differences between the AMB and ODE model. The ABM (discrete) is based on random interaction between a population of agents. This randomness leads to heavy volatility in the ratios of Susceptible/Infected/Removed that is not present in the purity of the ODE (continuous) model's mathematical solution. Futher, the ODE model has synchronous removal and infection rates, while the ABM treats these two as asynchronous actions -- only removing a proportion of the infected population after the disease has been spread further for that day.
@@ -26,7 +26,7 @@ These two factors lead the discrete model to output much more jagged phase plots
 
 
 
-###3.1 Phase Diagrams
+### 3.1 Phase Diagrams
 Ordinary Differential Equation Model (Continuous Model) | Agent-Based Model (Discrete Model) 
 -|-
 ![](figures/phase_diagram1.png) | ![](figures/abm_phase_diagram1.png)
@@ -38,7 +38,7 @@ The only way for a simulation to reach a completely infected populace is to have
 
 Also, we can see that for low _t_, the contour lines show that as `b` approaches certain levels, it requires very large increases in `k` to prevent the infection rate from skyrocketing. But, as `b` gets very large (beyond the level that causes a spike), the level of `k` required actually begins to decrease. This results from the fact that the phase diagrams fix the time, `t`, and so if `b` is too high, and the infection lasts for a relatively short time, then many infections will resolve before `t`. Meanwhile, if `b` is relatively small, then even small increases in `b` will cause the number of cases at time `t` to increase a lot if the recovery time, `k` is relatively longer.
 
-###3.2 Time Plots of S, I, R
+### 3.2 Time Plots of S, I, R
 b=3, k=0.01
 ![](figures/ode1.png)
 
@@ -48,8 +48,8 @@ b=3, k=0.1
 b=0.8, k=0.01
 ![](figures/ode3.png)
 
-##4. Possible Extensions/ Variations
-###4.1 Allow for different rates of interaction between certain individuals
+## 4. Possible Extensions/ Variations
+### 4.1 Allow for different rates of interaction between certain individuals
 #### Motivation
 This could apply to situations such as within-household transmission versus across-household transmission. The aim of this extension would be to relax the assumption that all members of a population interact with each other at a constant rate. It is easy to imagine that the rate of interaction between family members or neighbors tends to be much higher than the rate of interaction between strangers.
 
@@ -74,7 +74,7 @@ This exercise is primarily simulation-focused. However, if we want to attempt to
 2. https://www.alberta.ca/restrictions-on-gatherings.aspx
 3. https://www.alberta.ca/stats/covid-19-alberta-statistics.htm 
 
-###4.2 Use agent-based modelling to show the effect of (incomplete) mask usage
+### 4.2 Use agent-based modelling to show the effect of (incomplete) mask usage
 #### Motivation
 Although there is broad agreement that travel restrictions and social distancing are beneficial to limit the spreading of covid-19, recommendations around face mask use are inconsistent. Some country advise to wear face mask while other don't. And in the United States, different states have different policy. Therefore to vividly show the real effect of face mask usage and the effect of different coverage of that is important to the public. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results? Will wearing face masks limit the spreading trend or will it reduce the final infection proportion of population? Can wearing face mask delay the peak time of the epidemic?
 
@@ -96,7 +96,7 @@ Therefore, it's hard to test model against real-world data.
 Worby, C.J., Chang, HH. Face mask use in the general population and optimal resource allocation during the COVID-19 pandemic. Nat Commun 11, 4049 (2020). https://doi.org/10.1038/s41467-020-17922-x
 
 
-###4.3 Adding a compartment for "Exposed" individuals, turning the model into the SEIR model
+### 4.3 Adding a compartment for "Exposed" individuals, turning the model into the SEIR model
 #### motivation
 Suppose there is a policy for individuals to voluntarily quarantine themselves if they believe they have been exposed to the virus. Then suppose being in quarantine reduces the number of interactions that that individual has. 
 When considering this model, we want to investigate several questions.
@@ -120,7 +120,7 @@ This variation is also simulation-focused.
 #### reference
 https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#Variations_on_the_basic_SIR_model
 
-###4.4 Assume immunity is temporary and model the effects of a vaccine that takes time to roll out/ is not universally adopted
+### 4.4 Assume immunity is temporary and model the effects of a vaccine that takes time to roll out/ is not universally adopted
 #### motivation
 For a long time, people give their hope to vaccine. In this extension we hope to model the pandemic trend with vaccine being continuous produced and distributed. 
 Assume a vaccine comes out that grants temporary immunity to Covid-19. Further assume that only a relatively small portion of the population is able to gain access to the vaccine in each time period. 
@@ -136,7 +136,7 @@ Check and update the time recorder each step. If it is larger than the threshold
 #### Data
 This exercise is also simulation-focused.
 
-##5. References:
+## 5. References:
 1. Martcheva, M. (2015). An introduction to mathematical epidemiology. Heidelberg, New York: Springer. doi:10.1007/978-1-4899-7612-3
 2. Clinical Questions about COVID-19: Questions and Answers. (n.d.). Retrieved November 09, 2020, from https://www.cdc.gov/coronavirus/2019-ncov/hcp/faq.html
 3. Rodpothong, P., \& Auewarakul, P. (2012). Viral evolution and transmission effectiveness. World Journal of Virology, 1(5), 131. doi:10.5501/wjv.v1.i5.131
