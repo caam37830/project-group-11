@@ -5,12 +5,18 @@ The SIR model is a compartmental epidemiological model which assumes everyone in
 
 The trajectory of the disease generally depends on the parameters `b`, the per capita number of interactions capable of spreading the disease that occur per day, and `k`, the rate at which Infected individuals move into the Removed compartment. Notably, the basic SIR model assumes that all agents in the population interact randomly so every Susceptible individual shares an equal chance of becoming infected in each period. I.e. the probability for any given Susceptible individual to become infected in a period is `b * I/N`. Additionally, `k` can be interpreted as the reciprocal of the mean duration of infection when duration of infections are exponentially distributed (1). For Covid-19, no conclusive figure has been established as the mean duration of infection. However, the US CDC estimates that the majority of cases become no longer infectious within 10 days, though some serious cases can remain infectious for up to 20 days (2). 
 
+From the dicussion above, we can note that for any period, we can predict if the infection will continue to spread or being to decrease in the next period. Since the (expected) number of new infections can be given by `S * b * I/N` and the (expected) number of removals is given by `k * I`, if the ratio of the two, `(S * b) / (k*N) > 1` then the infection will continue to spread since the number of new infections outpaces the number of recoveries; whereas if `(S * b) / k*N) < 1`, the number of recoveries exceed te number of infections and so the infection will begin to die out on its own. Within epidemiolgy, this relationship is commonly known as the 'effective reproduction number'.
+
 ## Structure of the `sir` Package
 This version of the `sir` package contains implementations of classes that facilitate analysing the trajectory of Covid-19 using the SIR model. The `sir` folder currently contains a module for agent-based modeling, `abm`, as well as a module for modeling as a system of ordinary differential equations, `ode`. 
 
 The `test` folder contains the script `test.py` which can be run using `unittest` or `pytest` to verify the integrity of the `abm` and `ode` modules. The test is also continuously integrated using GitHub Actions. 
 
-Scripts used for generating the phase diagrams and simulation results presented later in this report are held in the `sctipts` folder.
+Scripts used for generating the phase diagrams and simulation results presented later in this report are held in the `scripts` folder. Note that the functions used to generate the figures is actually implemented within the `sir` module and the scripts simply specify initial conditions and call the methods from the module.
+
+The `doc` folder which contains the `checkpoint` subfolder which contains this report also contains the `final` subfolder which is where the report that accompanies the final implementation of this module will be contained.
+
+The `LICENSE`, `requirements`, and `setup` files are contained in the main directory so as to facilitate easy installation and use of this package.
 
 ## Results
 In our phase diagrams, we can see that higher values of b will lead to higher rates of population infection for any rate of removal k at low t-values. Once we start evaluating population rates at higher values of t, we see smaller rates of infection for high b values as the infection has spread rapidly and lead to a large removed population by the time t at which we evaluate.
