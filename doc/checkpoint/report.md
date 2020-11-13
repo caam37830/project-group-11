@@ -19,10 +19,10 @@ The `doc` folder which contains the `checkpoint` subfolder which contains this r
 The `LICENSE`, `requirements`, and `setup` files are contained in the main directory so as to facilitate easy installation and use of this package.
 
 ## 3. Results
-In our phase diagrams, we can see that higher values of b will lead to higher rates of population infection for any rate of removal k at low t-values. Once we start evaluating population rates at higher values of t (see t=10), we see that the highest rates of infected population come with more middling values of b. High b values will spread the disease faster, but will also lead to a faster removal rate. Thus, the way a disease maintains a steady infected population through higher t values is with a more meager spreading rate b.
+In our phase diagrams, we can see that higher values of `b` will lead to higher rates of population infection for any rate of removal `k` at low t-values. Once we start evaluating population rates at higher values of `t` (see t=10), we see that the highest rates of infected population come with more middling values of `b`. High `b` values will spread the disease faster, but will also lead to a faster removal rate. Thus, the way a disease maintains a steady infected population through higher `t` values is with a more meager spreading rate `b`.
 
 Additionally, our phase diagrams show us a few differences between the AMB and ODE model. The ABM (discrete) is based on random interaction between a population of agents. This randomness leads to heavy volatility in the ratios of Susceptible/Infected/Removed that is not present in the purity of the ODE (continuous) model's mathematical solution. Futher, the ODE model has synchronous removal and infection rates, while the ABM treats these two as asynchronous actions -- only removing a proportion of the infected population after the disease has been spread further for that day.
-These two factors lead the discrete model to output much more jagged phase plots than the smooth ODE counterparts. However, as t increases, the volatility of ABM flattens out and the phase plots begin to agree/converge to the ODE's mathematical solutions.
+These two factors lead the discrete model to output much more jagged phase plots than the smooth ODE counterparts. However, as `t` increases, the volatility of ABM flattens out and the phase plots begin to agree/converge to the ODE's mathematical solutions.
 
 
 
@@ -34,7 +34,7 @@ Ordinary Differential Equation Model (Continuous Model) | Agent-Based Model (Dis
 ![](figures/phase_diagram3.png) | ![](figures/abm_phase_diagram3.png)
 
 
-The only way for a simulation to reach a completely infected populace is to have a removal proportion (k) of 0. Otherwise, we see that higher rates of k deteriorate the infected population faster and faster. 
+The only way for a simulation to reach a completely infected populace is to have a removal proportion (`k`) of 0. Otherwise, we see that higher rates of `k` deteriorate the infected population faster and faster. 
 
 Also, we can see that for low _t_, the contour lines show that as `b` approaches certain levels, it requires very large increases in `k` to prevent the infection rate from skyrocketing. But, as `b` gets very large (beyond the level that causes a spike), the level of `k` required actually begins to decrease. This results from the fact that the phase diagrams fix the time, `t`, and so if `b` is too high, and the infection lasts for a relatively short time, then many infections will resolve before `t`. Meanwhile, if `b` is relatively small, then even small increases in `b` will cause the number of cases at time `t` to increase a lot if the recovery time, `k` is relatively longer.
 
@@ -55,7 +55,7 @@ This could apply to situations such as within-household transmission versus acro
 
 A hypothesis that could be tested is that even with very little social interaction with strangers ("outside interaction"), Covid could propagate quickly and widely if within-household interaction ("local interaction") remains relatively high. By simulating a Covid trajectory with both local and outside interaction, and then plotting a phase plane, we could see how the different types of interaction contribute to Covid spread.
 
-Another hypothesis is that differences in social structures will cause some individuals to be much more likely to be infected than others. This can be tested by running the simulation and examining the resulting pattern of infection (i.e. who is an isn't infected) after a given time period. More on this is explained in the following subsection.
+Another hypothesis is that differences in social structures will cause some individuals to be much more likely to be infected than others. This can be tested by running the simulation and examining the resulting pattern of infection (i.e. who is and isn't infected) after a given time period. More on this is explained in the following subsection.
 
 #### Changes to the Model
 An agent-based model of this could incorporate something similar to the 'game of life' previously examined in this course. That is, we assume all individuals live on a grid and we create 'neighbors' for each individual with whom the individual has a relatively high proabability of meeting every day. Meanwhile, the individual meets non-neighbors at a much lower probability every day. Again, we would assume that interaction with an infected individual causes susceptible individuals to become infected and they do not quarantine upon infection but gain immunity following infection. Based on the hypothesis above, we would expect to see that individuals closer to the center of the grid have a higher probability of being infected because they are, on average, closer in terms of number of degrees of social separation to every other individual than those closer to the edges of the grid. Ideally, a visualization of a sparse matrix could be generated to see this. Or, we could run the simulation multiple times and count the number of times each individual was infected and create a "heatmap" of infection probabilities.
@@ -76,20 +76,20 @@ This exercise is primarily simulation-focused. However, if we want to attempt to
 
 ### 4.2 Use agent-based modelling to show the effect of (incomplete) mask usage
 #### Motivation
-Although there is broad agreement that travel restrictions and social distancing are beneficial to limit the spreading of covid-19, recommendations around face mask use are inconsistent. Some countries advise to wear face mask while other don't. And in the United States, different states have different policies. Therefore we want to investigate and show the effect of different extents of face mask usage. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results? Will wearing face masks limit the spreading trend or will it reduce the final infection proportion of population? Can wearing face mask delay the peak time of the epidemic?
+Although there is broad agreement that travel restrictions and social distancing are beneficial to limit the spreading of covid-19, recommendations around face mask use are inconsistent. Some countries advise to wear face masks while others do not. Further, in the United States, different states have different policies. Therefore we want to investigate and show the effect of different extents of face mask usage. What is the relationship between the proportion of mask users and the spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results? Will wearing face masks limit the spreading trend or will it even reduce the final infection proportion of the population? Can face mask usage delay the peak time of the epidemic?
 
 #### Changes to the Model
-Suppose agents are separated into two 'types': those who wear masks and those who don't. Wearing a mask reduces the risk of spreading Covid-19 (conditional on being Infected) by xx% and reduces the risk of becoming Infected (conditional on being Susceptible and coming into contact with an Infected) by yy%. 
+Suppose agents are separated into two 'types': those who wear masks and those who do not. Wearing a mask reduces the risk of spreading Covid-19 (conditional on being Infected) by xx% and reduces the risk of becoming Infected (conditional on being Susceptible and coming into contact with an Infected) by yy%. 
 
-In discrete methods, we can define a new status `m_status=True` or `m_status=False` and change the function which simulate the spread process (`infect_pop` function in abm.py). 
+In discrete methods, we can define a new status `m_status=True` or `m_status=False` and incorporate it into the function which simulates the spread process (`infect_pop` function in abm.py). 
 For each `agent i`, when `agent i` is the virus spreader, the new spread parameter `b[i]` should be `xx% * b[i]`, and when `agent i` is the virus receiver, it have `yy%` probability to become infected. 
-Briefly speaking, when the agent decide to wear a mask, it will spread or receive the covid virus at a lower probability. 
-In addition, the patient recover process does not change, so we don't need to change parameter `k`.
+Briefly speaking, when an agent decides to wear a mask, it will spread or receive the covid virus at a lower probability. 
+In addition, the patient recovery process does not change, so we would not need to change parameter `k`.
 
-According to the reference paper, we can manipulate many variables. We can decide the percent of population that wearing face masks, and this percent can be a function of time and can vary among different population clusters. We can also discuss the effectiveness of face masks (our `xx%` and `yy%`)
+According to the reference paper, we can manipulate many variables. We can determine what proportion of the population wears a mask, and if this proportion changes over time or is different for different sub-populations. We can also manipulate the effectiveness of face masks (our `xx%` and `yy%`) in stopping the spread of disease.
 
 #### Data
-This exercise is primarily simulation-focused. In practice we don't know when and how people wear face mask, different masks have different protection level, and the relationship between demographic features and the mask coverage rate is not obvious. What we do have access to are the results of a survey conducted by New York Times in the summer of 2020 that reports county-level mask usage. This data may provide inspiration for some of the simulations we run.
+This exercise is primarily simulation-focused. In practice we don't have definite information on the effect and usage of facemasks -- different masks have varying protection levels, and the relationship between demographic features and the mask coverage rate is not obvious. What we do have access to are the results of a survey conducted by New York Times in the summer of 2020 that reports county-level mask usage. This data may provide inspiration for some of the simulations we run.
 
 #### Specific References
 1. Worby, C.J., Chang, HH. Face mask use in the general population and optimal resource allocation during the COVID-19 pandemic. Nat Commun 11, 4049 (2020). https://doi.org/10.1038/s41467-020-17922-x
@@ -98,9 +98,9 @@ This exercise is primarily simulation-focused. In practice we don't know when an
 
 ### 4.3 Adding a compartment for "Exposed" individuals, turning the model into the SEIR model
 #### Motivation
-Suppose there is a policy for individuals to voluntarily quarantine themselves if they believe they have been exposed to the virus. Then suppose being in quarantine reduces the number of interactions that that individual has. 
+Suppose there is a policy for individuals to voluntarily quarantine themselves if they believe they have been exposed to the virus. Then suppose being in quarantine reduces the number of interactions these individuals have for the extent of their quarantine.
 When considering this model, we want to investigate several questions.
-Could potentially make the rate at which individuals enter the Exposed category a function of Covid-19 cases to simulate the several waves of the virus that we are experiencing? 
+Would making the rate at which individuals enter the Exposed category a function of Covid-19 cases simulate the several waves of the virus that we are experiencing? 
 Is this policy really useful in terms of controlling the pandemic? Does it reduce total infection and/or reduce total death? How potent are other potential benefits such as reducing hospital loads?
 If this policy is proved effective to control the pandemic, what is the best length of quarantine (tradeoff of cost and benefit)?
 
@@ -115,7 +115,7 @@ We have `S + E + I + R = N`, Lambda is birth rate, mu is death rate. So by chang
 For discrete Agent Based Modeling, by adding a new status `E` and some operation functions, we can implement this extension.
 
 #### Data
-This variation is also simulation-focused. Potentially, we could try to use data on the number of Covid-19 cases in the US at the county-level(2) and phase diagrams to investigate what combinations of parameters could've led to their observed trajectory.
+This variation is also simulation-focused. Potentially, we could try to use data on the number of Covid-19 cases in the US at the county-level(2) and phase diagrams to investigate what combinations of parameters could have led to their observed trajectory.
 
 #### Specific References
 1. https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#Variations_on_the_basic_SIR_model
@@ -123,16 +123,17 @@ This variation is also simulation-focused. Potentially, we could try to use data
 
 ### 4.4 Assume immunity is temporary and model the effects of a vaccine that takes time to roll out/ is not universally adopted
 #### motivation
-For a long time, people give their hope to vaccine. In this extension we hope to model the pandemic trend with the vaccine being continuously produced and distributed. 
+For a long time, people have hoped for a virus endgame to the current pandemic. In this extension we hope to model the pandemic trend with the vaccine being continuously produced and distributed. 
 Assume a vaccine comes out that grants temporary immunity to Covid-19. Further assume that only a relatively small portion of the population is able to gain access to the vaccine in each time period. 
-How will the overall trajectory of Covid-19 look? Is there a minimum threshold for speed/ extent of vaccine adoption in order for it to be effective?
+How will the overall trajectory of Covid-19 look? Is there a minimum threshold for speed/extent of vaccine adoption in order for it to be effective?
 
 #### Changes to the model
-This extension is similar to wearing masks. When a person takes the vaccine, he will not be infected for a while and will not spread the virus. This is the same with absolutely effective masks. 
-When the effect of the vaccine disappears, that person will be lose that their immunity, just like someone who stops wearing their fully effective mask. 
+This extension is similar to our extension on the effectiveness of mask wearing. When a person takes the vaccine, they will not be infected for a while and will not spread the virus. This is the same with absolutely effective masks. 
+When the effect of the vaccine disappears, that person will lose their immunity, just like someone who stops wearing their fully effective mask. 
 
-For this variation, building an Agent Based Model is easy. We can modify the mask extension a bit by adding a time recorder to each person. When the person receive vaccine, his/her `m_status` turn to TRUE, and initialize the the time recorder to be 0. 
-Check and update the time recorder each step. If it is larger than the threshold, we should turn the `m_status` to be FALSE. It's difficult to model the situation explicitly using ODE. The situation could potentially be approximated using the DS-SIR model mentioned in a previous extension. 
+For this variation, building an Agent Based Model is easy. We can modify the mask extension a bit by adding a time recorder for each person. When the person receives vaccine, his/her `m_status` turns to TRUE, and initializes the the time recorder to be 0. 
+At every step `t` we will iterate their time recorder. If it is larger than the threshold, we will then turn the `m_status` to a FALSE state. 
+It is more difficult to model this situation explicitly using ODE. The situation could potentially be approximated using the DS-SIR model mentioned in a previous extension. 
 
 #### Data
 This exercise is simulation-focused. Data is inaccessible especially because no publicly available vaccine currently exists yet.
