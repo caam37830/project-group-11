@@ -1,5 +1,7 @@
 # packages required to run code
 numpy
 scipy
+numba
 matplotlib
 sympy
+tqdm
