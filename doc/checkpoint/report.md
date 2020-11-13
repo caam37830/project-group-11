@@ -47,14 +47,45 @@ This could apply to situations such as within-household transmission versus acro
 ### Use agent-based modelling to show the effect of (incomplete) mask usage
 Suppose agents are separated into two 'types': those who wear masks and those who don't. Wearing a mask reduces the risk of spreading Covid-19 (conditional on being Infected) by xx% and reduces the risk of becoming Infected (conditional on being Susceptible and coming into contact with an Infected) by yy%. What is the relationship between the proportion of mask users and spread of Covid-19? I.e. Is it linear or non-linear? Are there any positive or negative externalities that affect either type that results?
 
+In discrete method, we can define a new status 'M'. When the `agent i` wears a mask, then `b[i]` should be 0. And when a 'M' status agent receives the virus unfortunately, that agent will not be infected. Briefly speaking, when the agent decide to wear a mask, it will neither spread or receive any virus. 
+
+In continous method, we should change the 'ordinary differential equations'. This seem very difficult. One way is to remove those population who wear masks. Then we simulate the disease spread process among the remaining population. But if we carefully consider `ODE`, we'll find it to some kind make `b` larger.
+
+`ds'/dt = -b * s'(t) * i'(t)`
+
+`di'/dt = b * s'(t) * i'(t) - k * i'(t)`
+
+`dr/dt = k * i(t)`
+
+`s' = s - intersection(m, s)`, `i'= i- intersection(m, i)` 
+
+So, we prefer to use `Agent Based Model`. We do not need data for this extension.
+
 ### Adding a compartment for "Exposed" individuals, turning the model into the SEIR model
 Suppose there is a policy for individuals to voluntarily quarantine themselves if they believe they have been exposed to the virus. Then suppose being in quarantine reduces the number of interactions that that individual has. Could potentially make the rate at which individuals enter the Exposed category a function of Covid-19 cases to simulate the several waves of the virus that we are experiencing.
+
+[comment]: <> (<br> here is to add a new line, use<img> to add formulas in markdown file)
+<img src="https://latex.codecogs.com/svg.latex? \frac{dS}{dt} = \Lambda N - \mu S - \frac{\beta I S}{N}"/>
+<br> 
+<img src="https://latex.codecogs.com/svg.latex? \frac{dE}{dt} = \frac{\beta I S}{N} - (\mu +a ) E"/>
+<br>
+<img src="https://latex.codecogs.com/svg.latex? \frac{dI}{dt} = a E - (\gamma +\mu ) I"/>
+<br>
+<img src="https://latex.codecogs.com/svg.latex? \frac{dR}{dt} = \gamma I  - \mu R"/>
+
+We have`S + E + I + R = N`, <img src="https://latex.codecogs.com/svg.latex? \Lambda" /> is birth rate, <img src="https://latex.codecogs.com/svg.latex? \mu" /> is death rate.
+
+According to the equations above, we can use continous method by changing the rhs function and discrete method by add a new status and some operation functions.
+
+
 
 ### Assume immunity is temporary and model the effects of a vaccine that takes time to roll out/ is not universally adopted
 Assume a vaccine comes out that grants temporary immunity to Covid-19. Further assume that only a relatively small portion of the population is able to gain access to the vaccine in each time period. How will the overall trajectory of Covid-19 look? Is there a minimum threshold for speed/ extent of vaccine adoption in order for it to be effective?
 
+This extension is similar to wear musks. When a person take the vaccine, he will not be infected for a while and will not spread the virus. When the effect of the vaccine disappears, that person take off the musk. To implement this extension, we can add a effective period `ep` parameter to our musk related functions. Also, it's difficult to model the situation using ODE.
 
 
 ## References:
 1. Martcheva, M. (2015). An introduction to mathematical epidemiology. Heidelberg, New York: Springer. doi:10.1007/978-1-4899-7612-3
 2. Clinical Questions about COVID-19: Questions and Answers. (n.d.). Retrieved November 09, 2020, from https://www.cdc.gov/coronavirus/2019-ncov/hcp/faq.html
+3. https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#Variations_on_the_basic_SIR_model
