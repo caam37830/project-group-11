@@ -1,9 +1,8 @@
 import sys
 sys.path.append("../")
-from sir.abm import *
+from sir.abm import abm_phase, time_plot, new_pop
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 # Create 3 time plots at various b, k values
 pop = new_pop(10_000, 1)
