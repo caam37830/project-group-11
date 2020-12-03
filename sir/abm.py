@@ -2,7 +2,6 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from numba import njit
 
 class Person():
     """
@@ -11,7 +10,7 @@ class Person():
     The state attribute covers the agent's relationship with the disease.
     """
 
-    def __init__(self, state='S'):
+    def __init__(self, state='S', cohort='No Cohort'):
         """
         Creates an agent with a default susceptible status
         """
@@ -20,6 +19,7 @@ class Person():
         assert state in {'S', 'I', 'R'}, 'State must be S, I, or R'
 
         self.state = state
+        self.cohort = cohort
 
     def cur_state(self):
         """
@@ -29,7 +29,7 @@ class Person():
         return self.state
 
     def __repr__(self):
-        return f"Person({self.state})"
+        return f"Person({self.state}, Cohort: {self.cohort})"
     
     def infect(self):
         """
@@ -47,8 +47,14 @@ class Person():
 
         if self.state == 'I':
             self.state = 'R'
+    
+    def group(self, cohort):
+        """
+        Assign agent to a cohort
+        """
+        self.cohort = cohort
 
-def abm_pop_sim(pop, b, ob, k, t):
+def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=16):
     """
     Simulate the spread of a disease on a given population over t days.
     pop designates the starting state, b and k control the spread and recovery rate
@@ -57,8 +63,11 @@ def abm_pop_sim(pop, b, ob, k, t):
     I = []
     R = []
 
+    if strict_cohort == True:
+        pop = make_cohorts(pop, size=cohort_size)
+
     for i in range(t):
-        pop = infect_pop(pop, b, ob)
+        pop = infect_pop(pop, b, ob, strict_cohort)
         pop = remove_pop(pop, k)
         S.append(len(get_indices(pop, 'S')))
         I.append(len(get_indices(pop, 'I')))
@@ -88,48 +97,64 @@ def remove_pop(pop, k):
     return pop
 
 
-def infect_pop(pop, b, ob):
+def infect_pop(pop, b, ob, strict_cohort):
     """
-    Have each infected agent interact with b others
+    Have each infected agent interact with b of their neighbors.
+    Each infected agent also has a chance 'ob' to interact with any other agent.
     """
-    # Find infected agents
+    # Find flattened index of infected agents
+    
     infected = get_indices(pop, 'I')
-
     nrow, ncol = pop.shape
+    pop_flat = pop.flatten()
 
     # Infect population 
     for inf in infected:
-
-        # Find grid index of infected
-        i = inf // nrow
-        j = inf % ncol
-        nbrs = neighbors(i, j, nrow, ncol)
-
-        # Identify the b nbr interactions
-        # Only use b if there are b neighbors to interact with!
-        nei_interactions = min(b, len(nbrs))
-        receivers = random.sample(nbrs, nei_interactions)
-
-        # Infect neighbors
-        for rec in receivers:
-            pop[rec].infect()
-
-        # Check for interacting outside of cohort
-        if np.random.rand(1) < ob:
-            continue
-
-        # Infect a random other agent
-        out_i = np.random.choice(nrow)
-        out_j = np.random.choice(ncol)
-        pop[out_i,out_j].infect()
         
+        # Strict Cohort Policy -- Find members of static cohort
+        if strict_cohort == True:
+            # Identify infected agent's cohort and other members of this cohort
+            inf_cohort = pop_flat[inf].cohort
+            cohort_mems = [i for i, agent in enumerate(pop_flat) if agent.cohort == inf_cohort]
+            
+            # Identify the b cohort interactions
+            # If fewer than b cohort members, just do all members
+            coh_interactions = min(b, len(cohort_mems))
+            receivers = random.sample(cohort_mems, coh_interactions)
 
+            for rec in receivers:
+                pop_flat[rec].infect()
+
+        # Non-strict Cohort Policy -- Find dynamic neighbors
+        else:
+            # Convert flattened to grid index
+            i = inf // nrow
+            j = inf % ncol
+            # Find neighbors of current agent
+            nbrs = neighbors(i, j, nrow, ncol)
+
+            # Identify the b nbr interactions
+            # If fewer than b neighbors, just do all neighbors
+            nei_interactions = min(b, len(nbrs))
+            receivers = random.sample(nbrs, nei_interactions)
+
+            # Infect neighbors
+            for rec in receivers:
+                pop[rec].infect()
+
+        # Random check for outside of cohort interaction
+        if np.random.rand(1) < ob:
+            # Infect a random other agent
+            out_i = np.random.choice(nrow)
+            out_j = np.random.choice(ncol)
+            pop[out_i,out_j].infect()
+                
     return pop
 
 def neighbors(i, j, m, n):
     """
     Returns the neighboring indices for a given index
-    in a matrix  of m x n shape
+    in a matrix of m x n shape
     """
 
     # Sets default delta indices
@@ -149,6 +174,8 @@ def neighbors(i, j, m, n):
     # Applies deltas and yields neighboring indices
     for delta_i in inbrs:
         for delta_j in jnbrs:
+
+            # Ignore 0,0 neighbor (the agent itself)
             if delta_i == delta_j == 0:
                 continue
             else:
@@ -156,7 +183,6 @@ def neighbors(i, j, m, n):
 
     return nbrs
 
-                
 
 def get_indices(pop, state):
     """
@@ -183,6 +209,8 @@ def abm_phase(nrow, ncol, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=n
     # store initial state of pop for future use
     cts = np.zeros((len(bs), len(ks)))
     N = nrow * ncol
+
+    # Not using ob for the phase plot
     ob = 0
 
     for i, b in tqdm(enumerate(bs)):
@@ -251,3 +279,33 @@ def time_plot(pop, b, ob, k, t, save_path):
     if save_path is not None:
             plt.savefig(save_path)
     plt.show()
+
+def make_cohorts(pop, size=9):
+    """
+    Splits the population grid into square blocks of given size and
+    assigns a cohort to each block.
+    """
+    nrow, ncol = pop.shape
+
+    # Ensure cohort size is a perfect square, and a factor of population size
+    assert pop.size % size == 0 , 'Cohort size is not a factor of population size'
+    root_size = np.int(np.sqrt(size))
+    assert root_size == np.floor(root_size), 'Cohort size is not a perfect square'
+
+    # Split population grid into chunks of columns
+    rsplit = np.split(pop, nrow/root_size)
+    cohort_num = 0
+
+    for r in range(len(rsplit)):
+
+        # Splits column chunks into cohorts
+        csplit = np.hsplit(rsplit[r], ncol/root_size)
+        for c in range(len(csplit)):
+            cohort_num = cohort_num + 1
+
+            # Assigns group number to every agent within cohort
+            for i in range(root_size):
+                for j in range(root_size):
+                    csplit[c][i,j].group(cohort_num)
+
+    return pop

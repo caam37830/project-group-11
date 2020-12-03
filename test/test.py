@@ -22,14 +22,12 @@ class TestABM(unittest.TestCase):
     
     def test_closed_abm(self):
         
-        N = 100_000
-        pop = [Person() for i in range(N)]
-        for i in range(100):
-            pop[i].infect()
+        nrow = 100
+        ncol = 100
+        pop = new_pop(100, nrow, ncol)
+        t = 100
 
-        T = 100
-
-        pop, S, I, R = abm_pop_sim(pop, 4, 0.1, T)
+        pop, S, I, R = abm_pop_sim(pop, 4, 0, 0.1, t)
 
         s = np.true_divide(S, N)
         i = np.true_divide(I, N)
