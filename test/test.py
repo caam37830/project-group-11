@@ -49,7 +49,7 @@ class TestODE(unittest.TestCase):
         S = N - I - R
         k = 0.01
         b = 1
-        ode_covid = covid(S, I, R, b, k)
+        ode_covid = SIR(b, k, S=S, I=I, R=R)
         ode_covid.solve(t_bound=100)
         t = np.arange(5, 95, 5)
         s, i, r = ode_covid(t)
@@ -66,7 +66,7 @@ class TestODE(unittest.TestCase):
         k = 0.01
         b = 1
 
-        ode_covid = covid(S, I, R, b, k)
+        ode_covid = SIR(b, k, S=S, I=I, R=R)
         ode_covid.solve(t_bound=100)
         t = np.arange(5, 95, 5)
         s, i, r = ode_covid(t)
