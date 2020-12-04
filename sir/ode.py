@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 # todo 1. change plot color
 # todo 2. extension: contact rate "b" -> "b(t)"
 # todo 3. extension: vaccination related model modification
+# todo 4. phase plot need to be updated
 
 
 class covid():
@@ -60,7 +61,7 @@ class covid():
         """
         solve this ODE system, with RHS=self.rhs, y0=self.y0,
         return
-            ode.OdeResult - bunch object of ode results: t,y,sol, etc.
+            self.sol - ode.OdeResult object, bunch object of ode results: t,y,sol, etc.
 
         parameters
             t_bound - compute this system from day(0) to day(t_bound)
@@ -127,7 +128,7 @@ def phase_plot(N, I, R, t, phase='I', bs=np.linspace(1, 10, 50), ks=np.linspace(
     cts = np.zeros((len(bs), len(ks)))
     for i, b in enumerate(bs):
         for j, k in enumerate(ks):
-            ode_covid = covid(S=N-I-R, I=I, R=R, b=b, k=k)
+            ode_covid = SIR(b=b, k=k, S=N-I-R, I=I, R=R)
             ode_covid.solve(t_bound=t)
             cts[i, j] = ode_covid.sol.y[idx, -1]
 
@@ -454,7 +455,7 @@ class SEIR(covid):
         """
         redefine the model representation
         """
-        return f"Covid_SEIR(s={self.s}, e={self.e}, i={self.i}, r={self.r})(lam={self.lam}, b={self.b}, k={self.k}, a={self.a}, mu={self.mu})"
+        return f"Covid_SEIR(s={self.s}, e={self.e}, i={self.i}, r={self.r})\n(lam={self.lam}, b={self.b}, k={round(self.k, 4)}, a={round(self.a,4)}, mu={self.mu})"
 
     def rhs(self, t, y):
         """

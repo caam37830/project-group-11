@@ -18,12 +18,12 @@ ode_SIR.plot('../doc/checkpoint/figures/ode1.png')
 print(ode_SIR(100))
 
 
-# init the covid class
+# init the sir class with different parameters
 ode_SIR = SIR(b=3, k=0.1, S=S, I=I, R=R)
 ode_SIR.solve(t_bound=365)
 ode_SIR.plot('../doc/checkpoint/figures/ode2.png')
 
-# init the covid class
+# init the sir class with different parameters
 ode_SIR = SIR(b=0.8, k=0.01, S=S, I=I, R=R)
 ode_SIR.solve(t_bound=365)
 ode_SIR.plot('../doc/checkpoint/figures/ode3.png')
