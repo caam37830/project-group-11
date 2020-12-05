@@ -2,6 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from scipy.spatial import KDTree
 
 class Person():
     """
@@ -10,7 +11,7 @@ class Person():
     The state attribute covers the agent's relationship with the disease.
     """
 
-    def __init__(self, state='S', cohort='No Cohort'):
+    def __init__(self, state='S', cohort='No Cohort', pos=np.random.uniform(0,1,2)):
         """
         Creates an agent with a default susceptible status
         """
@@ -20,7 +21,7 @@ class Person():
 
         self.state = state
         self.cohort = cohort
-
+        self.pos = pos
     def cur_state(self):
         """
         Returns the agent's current status
@@ -29,7 +30,7 @@ class Person():
         return self.state
 
     def __repr__(self):
-        return f"Person({self.state}, Cohort: {self.cohort})"
+        return f"Person({self.state}, C: {self.cohort})"
     
     def infect(self):
         """
@@ -53,8 +54,19 @@ class Person():
         Assign agent to a cohort
         """
         self.cohort = cohort
+    
+    def move(self, p):
+        """
+        Move an agent by p distance
+        """
+        dpos = np.random.randn(2)
+        dpos = dpos / np.linalg.norm(dpos)
 
-def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=16):
+        new = self.pos + (dpos * p)
+        if ((new[0] >= 0 and new[0] <= 1) and (new[1] >= 0 and new[1] <= 1)):
+            self.pos = new
+
+def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=9):
     """
     Simulate the spread of a disease on a given population over t days.
     pop designates the starting state, b and k control the spread and recovery rate
@@ -68,22 +80,24 @@ def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=16):
 
     for i in range(t):
         pop = infect_pop(pop, b, ob, strict_cohort)
-        pop = remove_pop(pop, k)
-        S.append(len(get_indices(pop, 'S')))
-        I.append(len(get_indices(pop, 'I')))
-        R.append(len(get_indices(pop, 'R')))
+        pop = remove_pop_grid(pop, k)
+        pop_flat = pop.flatten()
+        S.append(len(get_indices(pop_flat, 'S')))
+        I.append(len(get_indices(pop_flat, 'I')))
+        R.append(len(get_indices(pop_flat, 'R')))
 
     return pop, S, I, R
 
 
-def remove_pop(pop, k):
+def remove_pop_grid(pop, k):
     """
     Remove k proportion of the infected population 
+    Uses a grid population
     """
     nrow, ncol = pop.shape
 
-    # Remove population
-    infected = get_indices(pop, 'I')
+    # Find current infected population
+    infected = get_indices(pop.flatten(), 'I')
     
     # Determine the rounded number of infected to remove
     removals = np.int(np.floor(len(infected) * k))
@@ -96,6 +110,22 @@ def remove_pop(pop, k):
     
     return pop
 
+def remove_pop(pop, k):
+    """
+    Remove k proportion of the infected population 
+    Uses a flattened population
+    """
+    # Find current infected population
+    infected = get_indices(pop, 'I')
+    
+    # Determine the rounded number of infected to remove
+    removals = np.int(np.floor(len(infected) * k))
+
+    # Remove k proportion of infected
+    for rem in random.sample(infected, removals):
+        pop[rem].remove()
+    return pop
+
 
 def infect_pop(pop, b, ob, strict_cohort):
     """
@@ -104,10 +134,10 @@ def infect_pop(pop, b, ob, strict_cohort):
     """
     # Find flattened index of infected agents
     
-    infected = get_indices(pop, 'I')
-    nrow, ncol = pop.shape
     pop_flat = pop.flatten()
-
+    infected = get_indices(pop_flat, 'I')
+    nrow, ncol = pop.shape
+    
     # Infect population 
     for inf in infected:
 
@@ -197,10 +227,8 @@ def get_indices(pop, state):
     Finds the population agents with a given state.
     Flattens the population for easier index finding.
     """
-    # Convert from grid pop to flattened pop
-    pop_flat = pop.flatten()
 
-    indices = [i for i, agent in enumerate(pop_flat) if agent.cur_state() == state]
+    indices = [i for i, agent in enumerate(pop) if agent.cur_state() == state]
     return indices
 
 def abm_phase(nrow, ncol, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=np.linspace(0.01, .5, 10), save_path=None, obs=None, obs_phase=False):
@@ -327,5 +355,61 @@ def make_cohorts(pop, size=9):
             for i in range(root_size):
                 for j in range(root_size):
                     csplit[c][i,j].group(cohort_num)
+
+    return pop
+
+
+def abm_2D_sim(pop, p, q, k, t):
+    """
+    Simulate the spread of a disease on a given population over t days.
+    pop designates the starting state, b and k control the spread and recovery rate
+    """
+    S = []
+    I = []
+    R = []
+
+    for i in range(t):
+        pop = move_pop(pop, p, q)
+        pop = remove_pop(pop, k)
+        S.append(len(get_indices(pop, 'S')))
+        I.append(len(get_indices(pop, 'I')))
+        R.append(len(get_indices(pop, 'R')))
+
+    return pop, S, I, R
+
+
+def move_pop(pop, p, q):
+    """
+    Have each agent move p distance and interact with other agents
+    in a q radius.
+    Ignores recovered agents as they have no meaningful interactions.
+    """
+ 
+    # Make a matrix of current positions
+    X = np.zeros((pop.size, 2))
+    for i in range(pop.size):
+        X[i,0] = pop[i].pos[0]
+        X[i,1] = pop[i].pos[1]
+
+    tree = KDTree(X)
+
+    # Find and move susceptible agents
+    susceptible = get_indices(pop, 'S')
+    for s in susceptible:
+        pop[s].move(p)
+        inds = tree.query_ball_point(pop[s].pos, q)
+
+        for j in inds:
+            if pop[j].state == 'I':
+                pop[s].infect()
+                break
+
+    # Find and move infected agents
+    infected = get_indices(pop, 'I')
+    for i in infected:
+        pop[i].move(p)
+        inds = tree.query_ball_point(pop[i].pos, q)
+        for j in inds:
+            pop[j].infect()
 
     return pop

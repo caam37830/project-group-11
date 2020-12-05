@@ -1,6 +1,6 @@
 import sys
 sys.path.append("../")
-from sir.abm import abm_phase, time_plot, new_pop
+from sir.abm import *
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -20,4 +20,3 @@ ks=np.linspace(0.01, .5,25)
 abm_phase(100, 100, 1, t=5, ks=ks, bs=bs, save_path='../doc/checkpoint/figures/abm_phase_diagram1.png')
 abm_phase(100, 100, 1, t=10, ks=ks, bs=bs, save_path='../doc/checkpoint/figures/abm_phase_diagram2.png')
 abm_phase(100, 100, 1, t=50, ks=ks, bs=bs, save_path='../doc/checkpoint/figures/abm_phase_diagram3.png')
-
