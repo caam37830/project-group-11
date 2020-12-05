@@ -22,6 +22,7 @@ class Person():
         self.state = state
         self.cohort = cohort
         self.pos = pos
+
     def cur_state(self):
         """
         Returns the agent's current status
@@ -35,11 +36,15 @@ class Person():
     def infect(self):
         """
         Agent catches the disease
-        Only possible for suscepitble agents
+        Only possible for susceptible agents
         """
-        if self.state == 'S':
-            self.state = 'I'
-    
+        try:
+            if self.state == 'S' and self.masked and np.random.rand(1) < self.risk or not self.masked:
+                self.state = 'I'
+        except AttributeError:
+            if self.state == 'S':
+                self.state = 'I'
+
     def remove(self):
         """
         Agent recovers and becomes immune (or succumbs to disease).
@@ -65,6 +70,17 @@ class Person():
         new = self.pos + (dpos * p)
         if ((new[0] >= 0 and new[0] <= 1) and (new[1] >= 0 and new[1] <= 1)):
             self.pos = new
+
+    def mask(self, infectivity, risk):
+        """
+        Grants an individual the mask attribute which can be used to modify their infectivity/ risk of infection depending on state
+        """
+        self.masked = True
+        self.infectivity = infectivity
+        self.risk = risk
+
+
+
 
 def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=9):
     """
@@ -110,6 +126,7 @@ def remove_pop_grid(pop, k):
     
     return pop
 
+
 def remove_pop(pop, k):
     """
     Remove k proportion of the infected population 
@@ -126,6 +143,21 @@ def remove_pop(pop, k):
         pop[rem].remove()
     return pop
 
+def mask_pop(pop, infectivity, risk, m):
+    """
+    Grants masks to m proportion of the population, randomly spread among susceptibles and infected
+    """
+    nrow, ncol = pop.shape
+    pop = pop.flatten()
+    sus = get_indices(pop.flatten(), 'S')
+    inf = get_indices(pop.flatten(), 'I')
+    masks = sus + inf
+    mask_num = np.int(np.floor(len(masks) * m))
+
+    for masked in random.sample(masks, mask_num):
+        pop.flatten()[masked].mask(infectivity, risk)
+    
+    return pop.reshape((nrow, ncol))
 
 def infect_pop(pop, b, ob, strict_cohort):
     """
@@ -159,10 +191,14 @@ def infect_pop(pop, b, ob, strict_cohort):
             # If fewer than b cohort members, just do all members
             coh_interactions = min(inside_int, len(cohort_mems))
             receivers = random.sample(cohort_mems, coh_interactions)
+            
 
             for rec in receivers:
-                pop_flat[rec].infect()
-
+                try:
+                    if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].infectivity or not pop_flat[inf].masked:
+                        pop_flat[rec].infect()
+                except AttributeError:
+                    pop_flat[rec].infect()
         # Non-strict Cohort Policy -- Find dynamic neighbors
         else:
             # Convert flattened to grid index
@@ -178,15 +214,24 @@ def infect_pop(pop, b, ob, strict_cohort):
 
             # Infect neighbors
             for rec in receivers:
-                pop[rec].infect()
-
+                try:
+                    if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].risk or not pop_flat[inf].masked:
+                        pop[rec].infect()
+                except AttributeError:
+                    pop[rec].infect()
         # Interact outside of cohort if check passed
         if outside_int:
             # Infect a random other agent
             out_i = np.random.choice(nrow)
             out_j = np.random.choice(ncol)
-            pop[out_i,out_j].infect()
-                
+            other = pop[out_i,out_j] 
+            
+            try:
+                if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].infectivity or not pop_flat[inf].masked:
+                    other.infect()
+
+            except AttributeError:
+                other.infect()
     return pop
 
 def neighbors(i, j, m, n):
@@ -293,7 +338,7 @@ def new_pop(start_inf, nrow, ncol):
     pop = [Person() for i in range(nrow * ncol)]
     pop_size = len(pop)
 
-    infected = random.sample(range(0,pop_size), start_inf)
+    infected = random.sample(range(pop_size), start_inf)
     # Infect a given number of the population
     for i in infected:
         pop[i].infect()
