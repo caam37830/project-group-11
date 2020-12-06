@@ -24,6 +24,7 @@ class TestABM(unittest.TestCase):
         
         nrow = 100
         ncol = 100
+        N = ncol * nrow
         pop = new_pop(100, nrow, ncol)
         t = 100
 
