@@ -23,6 +23,9 @@ class Person():
         self.cohort = cohort
         self.pos = pos
 
+        # Start with no mask
+        self.masked = False
+
     def cur_state(self):
         """
         Returns the agent's current status
@@ -38,11 +41,8 @@ class Person():
         Agent catches the disease
         Only possible for susceptible agents
         """
-        try:
-            if self.state == 'S' and self.masked and np.random.rand(1) < self.risk or not self.masked:
-                self.state = 'I'
-        except AttributeError:
-            if self.state == 'S':
+        if self.state == 'S':
+            if self.masked and np.random.rand(1) < self.risk or not self.masked:
                 self.state = 'I'
 
     def remove(self):
@@ -78,6 +78,13 @@ class Person():
         self.masked = True
         self.infectivity = infectivity
         self.risk = risk
+
+    def unmask(self):
+        """
+        Change an individual's mask status to False
+        """
+        if self.masked == True:
+            self.masked = False
 
 
 
@@ -143,21 +150,27 @@ def remove_pop(pop, k):
         pop[rem].remove()
     return pop
 
-def mask_pop(pop, infectivity, risk, m):
+def update_masks(pop, infectivity, risk, m, u):
     """
-    Grants masks to m proportion of the population, randomly spread among susceptibles and infected
+    Grants masks to m proportion of the unmasked susceptible and infected population
+    Take away masks from u proportion of the masked susceptible and infected population    
     """
-    nrow, ncol = pop.shape
-    pop = pop.flatten()
-    sus = get_indices(pop.flatten(), 'S')
-    inf = get_indices(pop.flatten(), 'I')
-    masks = sus + inf
+    sus_m = get_indices(pop.flatten(), 'S', True)
+    inf_m = get_indices(pop.flatten(), 'I', True)
+    sus_u = get_indices(pop.flatten(), 'S', False)
+    inf_u = get_indices(pop.flatten(), 'I', False)
+    masks = sus_u + inf_u
+    unmasks = sus_m + inf_m
     mask_num = np.int(np.floor(len(masks) * m))
+    unmask_num = np.int(np.floor(len(unmasks)*u))
 
-    for masked in random.sample(masks, mask_num):
-        pop.flatten()[masked].mask(infectivity, risk)
+    for unmasked in random.sample(masks, mask_num):
+        pop.flatten()[unmasked].mask(infectivity, risk)
+
+    for masked in random.sample(unmasks, unmask_num):
+        pop.flatten()[masked].unmask()
     
-    return pop.reshape((nrow, ncol))
+    return pop
 
 def infect_pop(pop, b, ob, strict_cohort):
     """
@@ -173,12 +186,16 @@ def infect_pop(pop, b, ob, strict_cohort):
     # Infect population 
     for inf in infected:
 
+        # Get indices on 2D grid
+        i = inf // ncol
+        j = inf % nrow
+
         # Determine if one of the interactions will be out of cohort
         if np.random.rand(1) < ob:
-            outside_int = 1
+            outside_int = True
             inside_int = b-1
         else:
-            outside_int = 0
+            outside_int = False
             inside_int = b
         
         # Strict Cohort Policy -- Find members of static cohort
@@ -192,18 +209,11 @@ def infect_pop(pop, b, ob, strict_cohort):
             coh_interactions = min(inside_int, len(cohort_mems))
             receivers = random.sample(cohort_mems, coh_interactions)
             
-
             for rec in receivers:
-                try:
-                    if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].infectivity or not pop_flat[inf].masked:
-                        pop_flat[rec].infect()
-                except AttributeError:
+                if pop[i, j].masked and np.random.rand(1) < pop[i, j].infectivity or not pop_flat[inf].masked:
                     pop_flat[rec].infect()
         # Non-strict Cohort Policy -- Find dynamic neighbors
         else:
-            # Convert flattened to grid index
-            i = inf // nrow
-            j = inf % ncol
             # Find neighbors of current agent
             nbrs = neighbors(i, j, nrow, ncol)
 
@@ -214,11 +224,9 @@ def infect_pop(pop, b, ob, strict_cohort):
 
             # Infect neighbors
             for rec in receivers:
-                try:
-                    if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].risk or not pop_flat[inf].masked:
-                        pop[rec].infect()
-                except AttributeError:
+                if pop[i, j].masked and np.random.rand(1) < pop[i, j].risk or not pop[i, j].masked:
                     pop[rec].infect()
+
         # Interact outside of cohort if check passed
         if outside_int:
             # Infect a random other agent
@@ -226,12 +234,9 @@ def infect_pop(pop, b, ob, strict_cohort):
             out_j = np.random.choice(ncol)
             other = pop[out_i,out_j] 
             
-            try:
-                if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].infectivity or not pop_flat[inf].masked:
-                    other.infect()
-
-            except AttributeError:
+            if pop[i, j].masked and np.random.rand(1) < pop[i, j].infectivity or not pop[i, j].masked:
                 other.infect()
+
     return pop
 
 def neighbors(i, j, m, n):
@@ -267,13 +272,18 @@ def neighbors(i, j, m, n):
     return nbrs
 
 
-def get_indices(pop, state):
+def get_indices(pop, state, masked=None):
     """
     Finds the population agents with a given state.
     Flattens the population for easier index finding.
     """
-
-    indices = [i for i, agent in enumerate(pop) if agent.cur_state() == state]
+    # use flattened pop
+    pop = pop.flatten()
+    if masked is None:
+        indices = [i for i, agent in enumerate(pop) if agent.cur_state() == state]
+    else:
+        assert isinstance(masked, bool), 'masked input must be a boolean'
+        indices = [i for i, agent in enumerate(pop) if agent.cur_state() == state and agent.masked == masked]
     return indices
 
 def abm_phase(nrow, ncol, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=np.linspace(0.01, .5, 10), save_path=None, obs=None, obs_phase=False):
@@ -330,8 +340,9 @@ def abm_phase(nrow, ncol, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=n
 
 def new_pop(start_inf, nrow, ncol):
     """
-    Create an initial state population
-    :param N: population size
+    Create an initial state population of size nrow * ncol which lives on a grid
+    :param nrow: number of rows in grid
+    :param ncol: number of columns in grid
     :param start_inf: count of infected initial state
     """
     # Create a population of susceptibles
@@ -429,6 +440,8 @@ def move_pop(pop, p, q):
     in a q radius.
     Ignores recovered agents as they have no meaningful interactions.
     """
+    # Use flattened pop
+    pop = pop.flatten()
  
     # Make a matrix of current positions
     X = np.zeros((pop.size, 2))
