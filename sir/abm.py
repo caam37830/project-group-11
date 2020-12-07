@@ -34,7 +34,7 @@ class Person():
         return self.state
 
     def __repr__(self):
-        return f"Person({self.state}, C: {self.cohort})"
+        return f"Person({self.state}, C: {self.cohort}, Masked: {self.masked})"
     
     def infect(self):
         """
@@ -89,10 +89,22 @@ class Person():
 
 
 
-def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=9):
+def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=9, m=0, u=0, infectivity=0.3, risk=0.7):
     """
     Simulate the spread of a disease on a given population over t days.
-    pop designates the starting state, b and k control the spread and recovery rate
+
+    ---
+    Arguments:
+    :param pop: the starting population
+    :param b: number of within-group interactions
+    :param ob: probability of interacting with any given out-of-group individual
+    :param k: recovery rate (proportion of Infected that move to Removed each period)
+    :param strict_cohort: boolean determines if interactions are restricted to cohorts. Default is False.
+    :param cohort_size: If strict_cohort is True, gives the size of cohorts
+    :param m: proportion of susceptible and infected individuals that gain masks in each period. Defaults to 0.
+    :param u: proportion of susceptible and infected individuals that lose masks in each period. Defaults to 0.
+    :param infectivity: relative infectiousness of masked infected individuals
+    :param risk: relative risk of catching disease of masked susceptible individuals
     """
     S = []
     I = []
@@ -104,6 +116,7 @@ def abm_pop_sim(pop, b, ob, k, t, strict_cohort=False, cohort_size=9):
     for i in range(t):
         pop = infect_pop(pop, b, ob, strict_cohort)
         pop = remove_pop_grid(pop, k)
+        pop = update_masks(pop, infectivity, risk, m, u)
         pop_flat = pop.flatten()
         S.append(len(get_indices(pop_flat, 'S')))
         I.append(len(get_indices(pop_flat, 'I')))
@@ -360,13 +373,13 @@ def new_pop(start_inf, nrow, ncol):
     return pop_grid
 
 
-def time_plot(pop, b, ob, k, t, save_path):
+def time_plot(pop, b, ob, k, t, m, u, infectivity, risk, save_path):
     """
     Runs a simulation with the given parameters and 
     Outputs a plot of the three state ratios over time t
     """
     N = pop.size
-    pop, S, I, R = abm_pop_sim(pop, b, ob, k, t)
+    pop, S, I, R = abm_pop_sim(pop, b, ob, k, t, m, u, infectivity, risk)
 
     s = np.true_divide(S, N)
     i = np.true_divide(I, N)
