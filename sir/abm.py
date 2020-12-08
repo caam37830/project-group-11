@@ -199,10 +199,6 @@ def infect_pop(pop, b, ob, strict_cohort):
     # Infect population 
     for inf in infected:
 
-        # Get indices on 2D grid
-        i = inf // ncol
-        j = inf % nrow
-
         # Determine if one of the interactions will be out of cohort
         if np.random.rand(1) < ob:
             outside_int = True
@@ -223,8 +219,9 @@ def infect_pop(pop, b, ob, strict_cohort):
             receivers = random.sample(cohort_mems, coh_interactions)
             
             for rec in receivers:
-                if pop[i, j].masked and np.random.rand(1) < pop[i, j].infectivity or not pop_flat[inf].masked:
-                    pop_flat[rec].infect()
+                if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].infectivity or not pop_flat[inf].masked:
+                    pop[rec].infect()
+
         # Non-strict Cohort Policy -- Find dynamic neighbors
         else:
             # Find neighbors of current agent
@@ -237,7 +234,7 @@ def infect_pop(pop, b, ob, strict_cohort):
 
             # Infect neighbors
             for rec in receivers:
-                if pop[i, j].masked and np.random.rand(1) < pop[i, j].risk or not pop[i, j].masked:
+                if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].risk or not pop_flat[inf].masked:
                     pop[rec].infect()
 
         # Interact outside of cohort if check passed
@@ -247,7 +244,7 @@ def infect_pop(pop, b, ob, strict_cohort):
             out_j = np.random.choice(ncol)
             other = pop[out_i,out_j] 
             
-            if pop[i, j].masked and np.random.rand(1) < pop[i, j].infectivity or not pop[i, j].masked:
+            if pop_flat[inf].masked and np.random.rand(1) < pop_flat[inf].infectivity or not pop_flat[inf].masked:
                 other.infect()
 
     return pop
@@ -390,7 +387,7 @@ def time_plot(pop, b, ob, k, t, m, u, infectivity, risk, save_path):
     plt.plot(t, s, label='Susceptible', color='green')
     plt.plot(t, i, label='Infectious', color='red')
     plt.plot(t, r, label='Removed', color='blue')
-    plt.title("SIR ABM Simulation, b={},k={}".format(b, k))
+    plt.title("SIR ABM Simulation, \n b={}, ob={}, k={}, m={}, u={}, m_infectivity={}, m_risk={}".format(b, ob, k, m, u, infectivity, risk))
     plt.ylabel("ratio")
     plt.xlabel("day")
     plt.legend()
@@ -484,3 +481,10 @@ def move_pop(pop, p, q):
             pop[j].infect()
 
     return pop
+
+
+if __name__ == '__main__':
+    pop = new_pop(10, 20, 20)
+    masked_pop = update_masks(pop, 0.2, 0.7, 0.5, 0)
+    
+    
