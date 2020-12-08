@@ -367,7 +367,7 @@ class SIRD(covid):
         """
         redefine the model representation
         """
-        return f"Covid_SIRD(s={self.s}, i={self.i}, r={self.r}, d={self.d})(b={self.b}, k={self.k}, mu={self.mu})"
+        return f"Covid_SIRD(s={self.s}, i={self.i}, r={self.r}, d={self.d})\n(b={self.b}, k={self.k}, mu={self.mu})"
 
     def rhs(self, t, y):
         """
@@ -415,7 +415,7 @@ class MSIR(covid):
         assert self.S + self.I + self.R + self.M == self.N, 'M+S+I+R should equal to N'
         self.s = self.S / self.N
         self.i = self.I / self.N
-        self.r = self.I / self.N
+        self.r = self.R / self.N
         self.m = self.M / self.N
 
         # redefine self.y0, self.labels, self.colors.
@@ -427,7 +427,7 @@ class MSIR(covid):
         """
         redefine the model representation
         """
-        return f"Covid_MSIR(m={self.m}, s={self.s}, i={self.i}, r={self.r})(lam={self.lam}, sigma={self.sigma}, b={self.b}, k={self.k}, mu={self.mu})"
+        return f"Covid_MSIR(m={self.m}, s={self.s}, i={self.i}, r={self.r})\n(lam={self.lam}, sigma={round(self.sigma,4)}, b={self.b}, k={self.k}, mu={self.mu})"
 
     def rhs(self, t, y):
         """
@@ -473,7 +473,7 @@ class SIRC(covid):
         assert self.S + self.I + self.R + self.C == self.N, 'S+I+R+C should equal to N'
         self.s = self.S / self.N
         self.i = self.I / self.N
-        self.r = self.I / self.N
+        self.r = self.R / self.N
         self.c = self.C / self.N
 
         # redefine self.y0, self.labels, self.colors.
@@ -485,7 +485,7 @@ class SIRC(covid):
         """
         redefine the model representation
         """
-        return f"Covid_SIRC(s={self.s}, i={self.i}, r={self.r}, c={self.c})(b={self.b}, k={self.k}, c1={self.c1}, c2={self.c2})"
+        return f"Covid_SIRC(s={self.s}, i={self.i}, r={self.r}, c={self.c})\n(b={self.b}, k={self.k}, c1={self.c1}, c2={self.c2})"
 
     def rhs(self, t, y):
         """
@@ -533,7 +533,7 @@ class SEIR(covid):
         assert self.S + self.I + self.R + self.E == self.N, 'S+E+I+R should equal to N'
         self.s = self.S / self.N
         self.i = self.I / self.N
-        self.r = self.I / self.N
+        self.r = self.R / self.N
         self.e = self.E / self.N
 
         # redefine self.y0, self.labels, self.colors.
@@ -601,7 +601,7 @@ class SEIS(covid):
         """
         redefine the model representation
         """
-        return f"Covid_SEIS(s={self.s}, e={self.e}, i={self.i})(lam={self.lam}, b={self.b}, k={self.k}, a={self.a}, mu={self.mu})"
+        return f"Covid_SEIS(s={self.s}, e={self.e}, i={self.i})\n(lam={self.lam}, b={self.b}, k={self.k}, a={self.a}, mu={self.mu})"
 
     def rhs(self, t, y):
         """
@@ -654,7 +654,7 @@ class MSEIR(covid):
         self.m = self.M / self.N
         self.s = self.S / self.N
         self.i = self.I / self.N
-        self.r = self.I / self.N
+        self.r = self.R / self.N
         self.e = self.E / self.N
 
         # redefine self.y0, self.labels, self.colors.
@@ -666,7 +666,7 @@ class MSEIR(covid):
         """
         redefine the model representation
         """
-        return f"Covid_MSEIR(m={self.m}, s={self.s}, e={self.e}, i={self.i}, r={self.r})(lam={self.lam}, sigma={self.sigma}, b={self.b}, k={self.k}, a={self.a}, mu={self.mu})"
+        return f"Covid_MSEIR(m={self.m}, s={self.s}, e={self.e}, i={self.i}, r={self.r})\n(lam={self.lam}, sigma={round(self.sigma,4)}, b={self.b}, k={self.k}, a={round(self.a,4)}, mu={self.mu})"
 
     def rhs(self, t, y):
         """
@@ -723,7 +723,7 @@ class MSEIRS(covid):
         self.m = self.M / self.N
         self.s = self.S / self.N
         self.i = self.I / self.N
-        self.r = self.I / self.N
+        self.r = self.R / self.N
         self.e = self.E / self.N
 
         # redefine self.y0, self.labels, self.colors.
@@ -735,7 +735,8 @@ class MSEIRS(covid):
         """
         redefine the model representation
         """
-        return f"Covid_MSEIRS(m={self.m}, s={self.s}, e={self.e}, i={self.i}, r={self.r})(lam={self.lam}, sigma={self.sigma}, b={self.b}, k={self.k}, a={self.a}, mu={self.mu}, l={self.l})"
+        return f"Covid_MSEIRS(m={self.m}, s={self.s}, e={self.e}, i={self.i}, r={self.r})\n" \
+               f"(lam={self.lam}, sigma={round(self.sigma,3)}, b={self.b}, k={self.k}, a={round(self.a,3)}, mu={self.mu}, l={round(self.l,3)})"
 
     def rhs(self, t, y):
         """
@@ -757,7 +758,7 @@ class MSEIQRDS(covid):
         q percent infectious will be become quarantine, they will not spread the virus
         so quarantine will not be included in the ode model,
             dm / dt = lam - sigma * m - mu * m
-            ds / dt = sigama * m + re * r - mu * s - b * s * (1-q)i
+            ds / dt = sigma * m + re * r - mu * s - b * s * (1-q)i
             de / dt = b * s * (1-q)i - (mu + a) * e
             di / dt = a * e - (k + mu) * i - d * log(i/1-i)
             dd / dt = d * log(i/1-i)
@@ -824,7 +825,7 @@ class MSEIQRDS(covid):
         """
         return f"Covid_MSEIQRDS(m={self.m}, s={self.s}, e={self.e}, i={self.i}, r={self.r}, d={self.d})" \
                f"\n(lam={self.parameters['lam']}, sigma={round(self.parameters['sigma'],4)}, b={self.parameters['b']}, k={round(self.parameters['k'], 4)}, q={self.parameters['q']}, " \
-               f"a={round(self.parameters['a'],4)}, mu={self.parameters['mu']}, dr={self.parameters['dr']}, re={round(self.parameters['re'],4)})"
+               f"\na={round(self.parameters['a'],4)}, mu={self.parameters['mu']}, dr={self.parameters['dr']}, re={round(self.parameters['re'],4)})"
 
     def rhs(self, t, y):
         """

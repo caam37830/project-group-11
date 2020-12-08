@@ -248,3 +248,38 @@ please check the source code to find more
             I - infectious population
             R - recovered population
             N - total population
+
+#### 2.10 MSEIQRDS model
+    
+    ode_mseirs(lam, sigma, b, k, a, mu, l, **kwargs)
+    
+        ODE model [maternally_derived_immunity-susceptible-exposed-infectious-quarantine-recovered-decreased]
+        q percent infectious will be become quarantine, they will not spread the virus
+        so quarantine will not be included in the ode model,
+            dm / dt = lam - sigma * m - mu * m
+            ds / dt = sigama * m + re * r - mu * s - b * s * (1-q)i
+            de / dt = b * s * (1-q)i - (mu + a) * e
+            di / dt = a * e - (k + mu) * i - d * log(i/1-i)
+            dd / dt = d * log(i/1-i)
+            dr / dt = k * i - (mu +re) * r
+
+        Parameter
+            lam - birth rate of total population
+            sigma - the rate of changing from maternally_derived_immunity to susceptible
+            b - b is number of interactions per individual per day
+            k - k is fraction of infectious period which recovers each day (0 < k < 1)
+            q - quarantine rate
+            a - 1/a is the mean incubation period of exponential distribution
+            mu - population decrease rate
+            dr - death/decrease rate
+            re - re-susceotible rate
+
+        Optional Parameter
+            M -
+            S - susceptible population
+            E - exposed population
+            I - infectious population
+            R - recovered population
+            D -
+            N - total population
+

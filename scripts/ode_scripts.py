@@ -32,3 +32,41 @@ ode_SIR.plot('../doc/checkpoint/figures/ode3.png')
 phase_plot(N, I, R, t=5, phase='I', save_path='../doc/checkpoint/figures/phase_diagram1.png')
 phase_plot(N, I, R, t=10, phase='I', save_path='../doc/checkpoint/figures/phase_diagram2.png')
 phase_plot(N, I, R, t=50, phase='I', save_path='../doc/checkpoint/figures/phase_diagram3.png')
+
+# other models
+from sir.ode import *
+ode_SIS = SIS(b=3, k=0.1)
+ode_SIS.solve(t_bound=365)
+ode_SIS.plot('./doc/final/figures/ode_sis.png')
+
+ode_SIRD = SIRD(b=3, k=0.1, mu=0.05)
+ode_SIRD.solve(t_bound=365)
+ode_SIRD.plot('./doc/final/figures/ode_sird.png')
+
+ode_MSIR = MSIR(lam=0.0003, sigma=1/180, b=3, k=0.1, mu=0.0003)
+ode_MSIR.solve(t_bound=365)
+ode_MSIR.plot('./doc/final/figures/ode_msir.png')
+
+ode_SIRC = SIRC(b=3, k=0.1, c1=0.1, c2=0.1)
+ode_SIRC.solve(t_bound=365)
+ode_SIRC.plot('./doc/final/figures/ode_sirc.png')
+
+ode_SEIR = SEIR(lam=0.0003, b=3, k=0.1, a=1/14, mu=0.0003)
+ode_SEIR.solve(t_bound=365)
+ode_SEIR.plot('./doc/final/figures/ode_seir.png')
+
+ode_SEIS = SEIS(lam=0.0003, b=3, k=0.1, a=1/14, mu=0.0003)
+ode_SEIS.solve(t_bound=365)
+ode_SEIS.plot('./doc/final/figures/ode_seis.png')
+
+ode_MSEIR = MSEIR(lam=0.0003, sigma=1/180, b=3, k=0.1, a=1/14, mu=0.0003)
+ode_MSEIR.solve(t_bound=365)
+ode_MSEIR.plot('./doc/final/figures/ode_mseir.png')
+
+ode_MSEIRS = MSEIRS(lam=0.0003, sigma=1/180, b=3, k=0.1, a=1/14, mu=0.0003, l=1/180)
+ode_MSEIRS.solve(t_bound=365)
+ode_MSEIRS.plot('./doc/final/figures/ode_mseirs.png')
+
+ode_MSEIQRDS = MSEIQRDS()
+ode_MSEIQRDS.solve(t_bound=365)
+ode_MSEIQRDS.plot('./doc/final/figures/ode_mseiqrds.png')

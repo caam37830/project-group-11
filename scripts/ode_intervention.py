@@ -15,7 +15,23 @@ iEq2.terminal = True
 iEq2.direction = 1
 iEq2.intervention = {'q': 0.99}
 
+# init model
 model = MSEIQRDS()
-sol = intervention_solve(model, events=[iEq1, iEq2], t_bound=365, h=1)
+model.solve(t_bound=365, h=1)
+model.plot(decorators=False,show=False)
+plt.xlabel('day')
+plt.ylabel('ratio')
+plt.title('MSEIQRDS without interventions')
+plt.legend()
+plt.savefig('./doc/final/figures/no_intervention.png')
+plt.show()
 
-intervention_plot(sol)
+
+# intervention with quarantine
+sol = intervention_solve(model, events=[iEq1, iEq2], t_bound=365, h=1)
+intervention_plot(sol, save_path='./doc/final/figures/intervention_q.png')
+
+# intervention with mask
+iEq1.intervention = {'b': 0.1}
+sol = intervention_solve(model, events=[iEq1], t_bound=365, h=1)
+intervention_plot(sol, save_path='./doc/final/figures/intervention_b.png')
