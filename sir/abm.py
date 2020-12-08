@@ -224,6 +224,8 @@ def infect_pop(pop, b, ob, strict_cohort):
 
         # Non-strict Cohort Policy -- Find dynamic neighbors
         else:
+            i = inf // ncol
+            j = (inf - 1) % ncol
             # Find neighbors of current agent
             nbrs = neighbors(i, j, nrow, ncol)
 
@@ -299,9 +301,10 @@ def get_indices(pop, state, masked=None):
 def abm_phase(nrow, ncol, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=np.linspace(0.01, .5, 10), save_path=None, obs=None, obs_phase=False):
     """
     plot phase diagram
-    :param N: starting population
+    :param nrow: number of rows for initial population
+    :param ncol: number of columns for initial population
     :param infected: starting infected count
-    :param t: time
+    :param t: time at which to take cross section
     :param bs: discrete b
     :param ks: discrete k
     :param save_path:
@@ -347,6 +350,83 @@ def abm_phase(nrow, ncol, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=n
     if save_path is not None:
         fig.savefig(save_path)
     plt.show()
+
+
+def abm_mask_phase(ms, us, infectivities, risks, usage=True, save_path=None, **kwargs):
+    """
+    plot phase diagram for mask usage parameters
+
+    Arguments:
+    ms: list of values to use for 'm' in simulation. Should be float if usage == False.
+    us: list of values to use for 'u' in simulation. Should be float if usage == False.
+    infectivities: list of values to use for 'infectivity' in simulation. Float if usage == True
+    risks: list of values to use for 'risk' in simulation. Float if usage == True
+    usage: Specify if producing phase to look at m and u (True) or infectivity and risk (False).
+    
+
+    Optional Keyword Arguments:
+    nrow: number of rows to use to generate population. Default 50
+    ncol: number of columns to use to generate population. Default 50
+    infected: number of initial infected. Default 15
+    b: number of neighbors interacted with per period. Default 3.
+    ob: probability of interaction with non-neighbor individuals. Default 1/nrow*ncol
+    k: recovery rate. Default 0.1
+    t: period at which to produce cross-section. Default 10
+    """
+    nrow = kwargs.get('nrow', 50)
+    ncol = kwargs.get('ncol', 50)
+    infected = kwargs.get('infected', 15)
+    N = nrow * ncol
+    b = kwargs.get('b', 3)
+    ob = kwargs.get('ob', 1/N)
+    k = kwargs.get('k', 0.1)
+    t = kwargs. get('t', 10)
+
+    # empty matrix of appropriate size
+    try:
+        cts = np.zeros((len(ms), len(us)))
+    except TypeError:
+        cts = np.zeros((len(infectivities), len(risks)))
+    
+    if usage == True:
+        assert(type(infectivities) is float and type(risks) is float), 'infectivity and risk must be singletons when usage == True'
+        for i, m in tqdm(enumerate(ms)):
+        # loop through us
+            for j, u in enumerate(us):
+                pop = new_pop(infected, nrow, ncol)
+                pop, S, I, R = abm_pop_sim(pop, b, ob, k, t, m=m, u=u)
+                cts[i, j] = np.true_divide(I[-1], N)
+          
+    else:
+        assert(type(ms) is float and type(us) is float), 'ms and us must be singletons when usage == False'
+        for i, inf in tqdm(enumerate(infectivities)):
+            for j, risk in enumerate(risks):
+                pop = new_pop(infected, nrow, ncol)
+                pop, S, I, R = abm_pop_sim(pop, b, ob, k, t, m=ms, u=us, infectivity=inf, risk=risk)
+                cts[i, j] = np.true_divide(I[-1], N)
+
+
+    # Create a phase plot with variation depending on if using k or ob as variable
+    fig, ax = plt.subplots()
+    if usage == True:
+        axcontour = ax.imshow(cts, extent=[np.min(ms), np.max(ms), np.max(us), np.min(us)])
+    else:
+        axcontour = ax.imshow(cts, extent=[np.min(risks), np.max(risks), np.max(infectivities), np.min(infectivities)])
+    fig.colorbar(axcontour)
+    ax.set_title('phase diagram [I, t={}]'.format(t))
+    if usage == True:
+        ax.set_xlabel('Proportion of Non-Masked to Masked per Period')
+        ax.set_ylabel('Proportion of Masked to Non-Masked per Period')
+    else:
+        ax.set_ylabel('Risk when Masked')
+        ax.set_xlabel('Infectivity when Masked')
+    
+
+    # Save plot
+    if save_path is not None:
+        fig.savefig(save_path)
+    plt.show()
+
 
 def new_pop(start_inf, nrow, ncol):
     """
@@ -481,10 +561,3 @@ def move_pop(pop, p, q):
             pop[j].infect()
 
     return pop
-
-
-if __name__ == '__main__':
-    pop = new_pop(10, 20, 20)
-    masked_pop = update_masks(pop, 0.2, 0.7, 0.5, 0)
-    
-    
