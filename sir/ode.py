@@ -1,6 +1,7 @@
 from scipy.integrate import solve_ivp
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import OptimizeResult
 
 # todo 1. change plot color
 # todo 2. extension: contact rate "b" -> "b(t)"
@@ -14,7 +15,7 @@ class covid():
 
     Methods for projecting and visualizing the trajectory given certain parameters are implemented
     """
-    def __init__(self, b ,k, **kwargs):
+    def __init__(self, b, k, **kwargs):
         """
         initialize class with initial values for each compartment
         """
@@ -24,6 +25,10 @@ class covid():
 
         assert b > 0, 'b must be a positive number'
         assert (k > 0 and k < 1), 'k must between 0 and 1'
+
+        self.parameters = {}
+        self.parameters['b'] = b
+        self.parameters['k'] = k
         self.b = b
         self.k = k
 
@@ -57,7 +62,7 @@ class covid():
         """
         return np.zeros(len(y))
 
-    def solve(self, t_bound, h=1, **kwargs):
+    def solve(self, t_bound=400, h=1, y0=None, **kwargs):
         """
         solve this ODE system, with RHS=self.rhs, y0=self.y0,
         return
@@ -70,13 +75,14 @@ class covid():
         """
         t_span = (0, t_bound)
         t_eval = np.arange(0, t_bound, h)
-
-        self.sol = solve_ivp(fun=self.rhs, t_span=t_span, y0=self.y0,
+        if y0 is None:
+            y0 = self.y0
+        self.sol = solve_ivp(fun=self.rhs, t_span=t_span, y0=y0,
                              t_eval=t_eval, dense_output=True, **kwargs)
 
         return self.sol
 
-    def plot(self, save_path=None):
+    def plot(self, save_path=None, decorators=True, show=True):
         """
         plot simulation result
         """
@@ -90,19 +96,103 @@ class covid():
         # loop and plot
         for i in range(n_com):
             plt.plot(self.sol.t, self.sol.y[i], label=self.labels[i], color=self.colors[i])
-        plt.title(self.__repr__())
-        plt.ylabel("ratio")
-        plt.xlabel("day")
-        plt.legend()
+
+        if decorators:
+            plt.title(self.__repr__())
+            plt.ylabel("ratio")
+            plt.xlabel("day")
+            plt.legend()
+
         if save_path is not None:
             plt.savefig(save_path)
+
+        if show:
+            plt.show()
+
+
+class OdeResult(OptimizeResult):
+    pass
+
+
+def intervention_solve(model, events, t_bound=400, h=1, **kwargs):
+    """
+    under some condition, the society take some actions, then solve the problem.
+    """
+    # check terminal
+    assert isinstance(model, MSEIQRDS), 'should use most general model'
+    for event in events:
+        assert event.terminal == True, 'all intervention would cause model change, so event.terminal must be True'
+        try:
+            assert isinstance(event.intervention, dict), 'events intervention should be a dict'
+        except:
+            raise AttributeError('this event function object has not define a attribute named "intervention"')
+
+    # if some events happen, solve it until time is up.
+    def findidx(l):
+        for i, item in enumerate(l):
+            if len(item) > 0:
+                return i
+        return None
+
+    sol = model.solve(t_bound, h=h, events=events)
+    event_idx = findidx(sol.t_events)
+
+    if event_idx is None:
+        return OdeResult(t=sol.t, y=sol.y, t_events=None, interventions=None)
+
+    # implement model.solve until t_solved >= t_bound
+    t_events = []
+    interventions = []
+
+    t_solved = sol.t[-1]
+    t_events.append(t_solved)
+    new_intervention = events[event_idx].intervention
+    interventions.append(new_intervention.copy())
+    intervention_dic = new_intervention
+    y = sol.y
+    y0 = sol.y[:, -1]
+    events.remove(events[event_idx])
+    while t_solved < t_bound-1:
+        model = MSEIQRDS(**intervention_dic)
+        sol = model.solve(t_bound=t_bound-t_solved, y0=y0, h=h, events=events)
+
+        # update state variables
+        t_solved += sol.t[-1]
+        y = np.hstack((y, sol.y[:, 1:]))
+        y0 = sol.y[:, -1]
+
+        # if solve to t_bound, then directly return results.
+        if t_solved == t_bound-1:
+            return OdeResult(t=np.arange(0, t_solved+1, h), y=y, t_events=t_events, interventions=interventions)
+
+        # else find intervention and update intervention dict
+        t_events.append(t_solved)
+        event_idx = findidx(sol.t_events)
+        new_intervention = events[event_idx].intervention
+        interventions.append(new_intervention.copy())
+        intervention_dic.update(new_intervention)
+        events = events.remove(events[event_idx])
+
+    return OdeResult(t=np.arange(0, t_solved+1, h), y=y, t_events=t_events, interventions=interventions)
+
+
+def intervention_plot(sol, save_path=None, show=True):
+    model = MSEIQRDS()
+    for i in range(6):
+        plt.plot(sol.t, sol.y[i], label=model.labels[i], color=model.colors[i])
+    for i, t in enumerate(sol.t_events):
+        plt.vlines(t, ymin=0, ymax=1, colors='black', linestyles='dashed', label='%dst intervention' % (i+1))
+    plt.title('MSEIQRDS model with interventions\n'+str(sol.interventions))
+    plt.ylabel("ratio")
+    plt.xlabel("day")
+    plt.legend()
+
+    if save_path is not None:
+        plt.savefig(save_path)
+    if show:
         plt.show()
 
-    def event_solve(self):
-        """
-        under some condition, the society take some actions, then solve the problem.
-        """
-        pass
+
 
 def phase_plot(N, I, R, t, phase='I', bs=np.linspace(1, 10, 50), ks=np.linspace(0.01, .5, 50), save_path=None):
     """
@@ -657,3 +747,99 @@ class MSEIRS(covid):
         i_ = self.a * y[2] - (self.mu + self.k) * y[3]
         r_ = self.k * y[3] - (self.mu + self.l) * y[4]
         return np.array([m_, s_, e_, i_, r_])
+
+
+class MSEIQRDS(covid):
+    def __init__(self, **kwargs):
+        """
+        init MSEIQRSD model parameters,
+        [maternally_derived_immunity-susceptible-exposed-infectious-quarantine-recovered-decreased]
+        q percent infectious will be become quarantine, they will not spread the virus
+        so quarantine will not be included in the ode model,
+            dm / dt = lam - sigma * m - mu * m
+            ds / dt = sigama * m + re * r - mu * s - b * s * (1-q)i
+            de / dt = b * s * (1-q)i - (mu + a) * e
+            di / dt = a * e - (k + mu) * i - d * log(i/1-i)
+            dd / dt = d * log(i/1-i)
+            dr / dt = k * i - (mu +re) * r
+
+        Parameter
+            lam - birth rate of total population
+            sigma - the rate of changing from maternally_derived_immunity to susceptible
+            b - b is number of interactions per individual per day
+            k - k is fraction of infectious period which recovers each day (0 < k < 1)
+            q - quarantine rate
+            a - 1/a is the mean incubation period of exponential distribution
+            mu - population decrease rate
+            dr - death/decrease rate
+            re - re-susceotible rate
+
+        Optional Parameter
+            M -
+            S - susceptible population
+            E - exposed population
+            I - infectious population
+            R - recovered population
+            D -
+            N - total population
+        """
+
+        # init model related parameters
+        # lam=3e-5, sigma=1/720, b=3, k=1/10, q=0, a=1/14, mu=3e-5, d=0.3, re=1/360,
+        self.parameters = {}
+        self.parameters['lam'] = kwargs.get('lam', 3e-5)
+        self.parameters['sigma'] = kwargs.get('sigma', 1/720)
+        self.parameters['b'] = kwargs.get('b', 3)
+        self.parameters['k'] = kwargs.get('k', 0.1)
+        self.parameters['a'] = kwargs.get('a', 1/14)
+        self.parameters['mu'] = kwargs.get('mu', 3e-5)
+        self.parameters['q'] = kwargs.get('q', 0)
+        self.parameters['dr'] = kwargs.get('dr', 0.3)
+        self.parameters['re'] = kwargs.get('re', 1/360)
+
+        self.S = kwargs.get('S', 999_995)
+        self.I = kwargs.get('I', 5)
+        self.R = kwargs.get('R', 0)
+        self.E = kwargs.get('E', 0)
+        self.M = kwargs.get('M', 0)
+        self.D = kwargs.get('D', 0)
+        self.N = kwargs.get('N', self.S + self.I + self.R + self.E + self.M + self.D)
+        assert self.S + self.I + self.R + self.E + self.M + self.D == self.N, 'M+S+E+I+R+D should equal to N'
+        self.s = kwargs.get('s', self.S / self.N)
+        self.i = kwargs.get('i', self.I / self.N)
+        self.r = kwargs.get('r', self.R / self.N)
+        self.e = kwargs.get('e', self.E / self.N)
+        self.m = kwargs.get('m', self.M / self.N)
+        self.d = kwargs.get('d', self.D / self.N)
+
+        self.sol = None
+        # redefine self.y0, self.labels, self.colors.
+        self.y0 = np.array([self.m, self.s, self.e, self.i, self.r, self.d])
+        self.labels = ['MDI', 'Susceptible', 'Exposed', 'Infectious', 'Death', 'Removed']
+        self.colors = ['yellow', 'green', 'grey', 'red', 'black', 'blue']
+
+    def __repr__(self):
+        """
+        redefine the model representation
+        """
+        return f"Covid_MSEIQRDS(m={self.m}, s={self.s}, e={self.e}, i={self.i}, r={self.r}, d={self.d})" \
+               f"\n(lam={self.parameters['lam']}, sigma={round(self.parameters['sigma'],4)}, b={self.parameters['b']}, k={round(self.parameters['k'], 4)}, q={self.parameters['q']}, " \
+               f"a={round(self.parameters['a'],4)}, mu={self.parameters['mu']}, dr={self.parameters['dr']}, re={round(self.parameters['re'],4)})"
+
+    def rhs(self, t, y):
+        """
+        Define SEIR model's differential equations
+            dm / dt = lam - sigma * m - mu * m
+            ds / dt = sigama * m + re * r - mu * s - b * s * (1-q)i
+            de / dt = b * s * (1-q)i - (mu + a) * e
+            di / dt = a * e - (k + mu) * i - d * i^2 / (1-i)
+            dd / dt = d * i^2 / (1-i)
+            dr / dt = k * i - (mu + re) * r
+        """
+        m_ = self.parameters['lam'] - (self.parameters['sigma'] + self.parameters['mu']) * y[0]
+        s_ = self.parameters['sigma'] * y[0] + self.parameters['re'] * y[5] - self.parameters['b'] * y[1] * (1 - self.parameters['q']) * y[3] - self.parameters['mu'] * y[1]
+        e_ = self.parameters['b'] * y[1] * (1 - self.parameters['q']) * y[3] - (self.parameters['mu'] + self.parameters['a']) * y[2]
+        i_ = self.parameters['a'] * y[2] - (self.parameters['mu'] + self.parameters['k']) * y[3] - self.parameters['dr'] * y[3] / (1-y[3]) * y[3]
+        d_ = self.parameters['dr'] * y[3] / (1-y[3]) * y[3]
+        r_ = self.parameters['k'] * y[3] - (self.parameters['mu'] + self.parameters['re']) * y[5]
+        return np.array([m_, s_, e_, i_, d_, r_])
