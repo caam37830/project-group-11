@@ -460,7 +460,7 @@ def time_plot(pop, b, ob, k, t, m, u, infectivity, risk, save_path, q=0, p=0):
     if q != 0:
         pop, S, I, R = abm_2D_sim(pop, p, q, k, t)
     else:
-        pop, S, I, R = abm_pop_sim(pop, b, ob, k, t, m, u, infectivity, risk)
+        pop, S, I, R = abm_pop_sim(pop, b=b, ob=ob, k=k, t=t, m=m, u=u, infectivity=infectivity, risk=risk)
 
 
     s = np.true_divide(S, N)
