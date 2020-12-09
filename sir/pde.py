@@ -19,7 +19,7 @@ def forward_diff_matrix(n):
 
     return sparse.coo_matrix((data, (i, j)), shape=(n, n)).tocsr()
 
-
+# delta matrix
 def delta(shape: tuple):
     m, n = shape
     d = forward_diff_matrix(n)
@@ -31,7 +31,7 @@ def delta(shape: tuple):
 
 class covid2D():
     """
-    A population in which Covid is present
+    2D spatial SIR model
 
     Methods for projecting and visualizing the trajectory given certain parameters are implemented
     """
@@ -54,7 +54,7 @@ class covid2D():
 
         self.sol = None
 
-        # infectious population are uniformly distributed in different virus source
+        # init flattened s,i,r matrix
         self.i = np.zeros(M * M)
 
         if isinstance(sourcepoint, int):
