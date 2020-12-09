@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
+# Set a default k and q
 q = np.sqrt(3 / (50*50) / np.pi)
 k = .1
 
@@ -19,9 +20,11 @@ for j, p in enumerate(ps):
     time_plot(pop, 0, 0, .1, 100 , 0, 0, 0, 0, '../doc/final/figures/abmStepSize%.2f.png' % p, q=q, p=p)
 
 
-
+# Choose a set t and p
 t = 100
 p = .02
+
+# Generate timeplots at various infection outbreak locations
 
 # Centered infected start
 pop = new_pop(0,50,50)

@@ -13,7 +13,11 @@ class Person():
 
     def __init__(self, state='S', cohort='No Cohort'):
         """
-        Creates an agent with a default susceptible status
+        Creates an agent with a default susceptible status and no cohort
+
+        Parameter
+            state - state is the initial health status of the agent
+            cohort - cohort is the regimented social group the agent belongs to
         """
 
         # Check for valid status if not default
@@ -188,8 +192,11 @@ def update_masks(pop, infectivity, risk, m, u):
 
 def infect_pop(pop, b, ob, strict_cohort):
     """
-    Have each infected agent interact with b of their neighbors.
+    Have each infected agent interact with b of their local agents.
     Each infected agent also has a chance 'ob' to interact with any other agent.
+
+    Local agents determined by nearest grid neighbors or by cohort group. Method
+    determined by strict_cohort
     """
     # Find flattened index of infected agents
     
@@ -308,7 +315,9 @@ def abm_phase(nrow, ncol, infected, t, bs=np.arange(1, 11, dtype=np.int64), ks=n
     :param t: time at which to take cross section
     :param bs: discrete b
     :param ks: discrete k
-    :param save_path:
+    :param save_path: filepath location if saving
+    :param obs: discrete ob
+    :param obs: determine if doing a phase of ob or k
     :return:
     """
     # store initial state of pop for future use
@@ -457,6 +466,8 @@ def time_plot(pop, b, ob, k, t, m, u, infectivity, risk, save_path, q=0, p=0):
     Outputs a plot of the three state ratios over time t
     """
     N = pop.size
+
+    # Uses a 2D spatial model if q specified. Otherwise uses 1D SIR
     if q != 0:
         pop, S, I, R = abm_2D_sim(pop, p, q, k, t)
     else:
@@ -482,7 +493,7 @@ def time_plot(pop, b, ob, k, t, m, u, infectivity, risk, save_path, q=0, p=0):
 
 def make_cohorts(pop, size=9):
     """
-    Splits the population into cohorts of a given size
+    Splits the population grid into cohorts of a given size
     """
     nrow, ncol = pop.shape
 
@@ -514,6 +525,12 @@ def abm_2D_sim(pop, p, q, k, t):
     """
     Simulate the spread of a disease on a given population over t days.
     pop designates the starting state, b and k control the spread and recovery rate
+
+    :param pop: grid of agents
+    :param p: length of agent movement step
+    :param q: radius of agent's interaction circle
+    :param k: daily proportion of infected recovery
+    :param t: number of days to simulate
     """
     S = []
     I = []

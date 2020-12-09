@@ -112,6 +112,8 @@ b = 3
 obs = np.logspace(-3, 0,15)
 ts = np.linspace(0, 50, 11)
 cts = np.zeros((len(obs), len(ts)))
+
+# Record infection rates for many simulations at different ob levels
 for i, ob in tqdm(enumerate(obs)):
     pop = new_pop(1, 90, 90)
     pop, S, I, R = abm_pop_sim(pop, b, ob, .1, 50, strict_cohort=True)
