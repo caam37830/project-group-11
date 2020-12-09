@@ -76,7 +76,7 @@ To identify the relationship between our spatial component and the duration of o
 
 corner|center|random
 -|-|-
-![](figures/abm2dCorner.png)|![](figures/abm2dCenter.png)|![](figures/abm2dCRndom.png)
+![](figures/abm2dCorner.png)|![](figures/abm2dCenter.png)|![](figures/abm2dRandom.png)
 
 The agent-based figures largely compare well to the PDE counterparts:
 
@@ -86,7 +86,50 @@ The agent-based figures largely compare well to the PDE counterparts:
 
 ## 3. Extensions to the SIR Model
 
-### Allowing for different rates of contact between certain individuals
+### Allowing for Different Rates of Local and Non-Local Interactions
+
+One major procedure for stemming the spread of an epidemic virus is to cut out all unnecessary close contact with infrequent social circles. Part of the province of Alberta's COVID-19 Relaunch guidelines was the insistence that social interactions without the proper safety measures (eg mask wearing and social distancing) to be limited to a core cohort of individuals. This kind of group often is established as a household or an extended household. Done effectively, a cohort helps insulate your social circle from the virus, and helps contain the virus within your social circle if someone within is infected.
+
+Our initial agent-based model considered interactions to occur randomly across the populace. For this extension, we will instead be considering all `b` interactions to occur within an agent's cohort. The last of these `b` interactions will have a chance to occur outside the cohort, or non-locally. We will label this outside `b` chance as the parameter `ob`.
+
+To loosely identify cohorts, our agent population will be assembled into an two-dimensional, N x N, grid. The fellow agents immediately surrounding an agent will be considered its local interaction candidates. For most agents this will be a group of 8, whereas for the agents on the edge of the grid this could be as low as 3. The simulation will occur in the same format as our vanilla SIR ABM, but with the `b` interactions affecting only direct neighbors, with the aformentioned chance `ob` that an interaction occurs with a non-neighbor.
+
+With the below phase diagram, we can see how our disease spread changes based on the value of `ob`. To judge it in comparison to our initial SIR model, we'll use the consistent parameters `b`=3 and `k`=0.1.
+
+
+![](./figures/NonLocalPhase.png)
+
+-Largely, the implementation of cohorts to the model dulls the spread of the virus. Most simulations do not reach high levels of infection until day 35.
+-Higher values of `ob` lead to faster rates of infection more in line with the spread we saw in our vanilla SIR model.
+-Even in spite of cohorts, we still eventually the infection hitting the population heavily within 50 days.
+
+
+In addition to seeing how the cohorts affect the spread as a whole, we can also gauge how it affects certain agents differently. Below we have run a hundred simulations with cohorts in place to determine which individuals are likeliest to be infected.
+
+![](./figures/Var1heatmap.png)
+
+-From this plot we can see that the most susceptible agents lie in the central band of our population grid. These individuals have the same number of agents in their direct cohort, but are also closer to every other cohort on the grid than the majority of other agents.
+-Contrarily, those on the edge of the grid have more degrees of social separation than the average agent, and thus have the lowest chance of infection.
+
+The issue with using direct neighbors as a cohort is that only implements loose cohorts. It is somewhat helpful in stemming the disease spread, but if everyone in an agent's cohort is also part of separate cohorts, there exists a maneuverable path for the disease to spread between any two agents. Part of the province of Alberta's stricter guidelines was to insist that citizens participate in one single core cohort. That is, the same people should be in a singular small group. This distinction separates cohorts that consist of households to those that consist of households and additionals.
+
+To model a stricter variation of cohorts, we instead assigned every agent in our population to a group of 9 individuals. Now instead of local interactions occurring with their neighbors, it occurs with their neighbors that have the same cohort. 
+
+If we look at a similar phase diagram for `ob` with this change, we can observe the following:
+
+![](./figures/CohortPhase.png)
+
+-The non-local interaction chance becomes drastically more important in producing high levels of infection. When `ob` is low, infection does not get high in the first 50 days.
+-This stricter cohort enforcement is far more effective than the looser guidelines initially provided.
+
+
+To further identify the background of this change in infection rate, we can look at a similar heatmap of infection rates from another hundred simulations:
+
+![](./figures/StrictCohortHeatmap.png)
+
+-This map is a lot less smooth as infections that occur happen and stick within a certain cohort block.
+-In general, very few cohorts hit any concering rate of infection
+-Anytime a cohort member does get infected, the rest of the 9 members generally follow suit.
 
 ### Incorporate Interventions
 For ODE model, use the most general model.
