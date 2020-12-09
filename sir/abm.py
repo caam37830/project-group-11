@@ -390,7 +390,7 @@ def abm_mask_phase(ms, us, infectivities, risks, usage=True, save_path=None, **k
         cts = np.zeros((len(infectivities), len(risks)))
     
     if usage == True:
-        assert(type(infectivities) is float and type(risks) is float), 'infectivity and risk must be singletons when usage == True'
+        assert(type(infectivities) is float and type(risks) is float), 'infectivity and risk must be floats when usage == True'
         for i, m in tqdm(enumerate(ms)):
         # loop through us
             for j, u in enumerate(us):
@@ -399,7 +399,7 @@ def abm_mask_phase(ms, us, infectivities, risks, usage=True, save_path=None, **k
                 cts[i, j] = np.true_divide(I[-1], N)
           
     else:
-        assert(type(ms) is float and type(us) is float), 'ms and us must be singletons when usage == False'
+        assert(type(ms) is float and type(us) is float), 'ms and us must be floats when usage == False'
         for i, inf in tqdm(enumerate(infectivities)):
             for j, risk in enumerate(risks):
                 pop = new_pop(infected, nrow, ncol)
@@ -410,14 +410,14 @@ def abm_mask_phase(ms, us, infectivities, risks, usage=True, save_path=None, **k
     # Create a phase plot with variation depending on if using k or ob as variable
     fig, ax = plt.subplots()
     if usage == True:
-        axcontour = ax.imshow(cts, extent=[np.min(ms), np.max(ms), np.max(us), np.min(us)])
+        axcontour = ax.imshow(cts, extent=[np.min(us), np.max(us), np.max(ms), np.min(ms)])
     else:
         axcontour = ax.imshow(cts, extent=[np.min(risks), np.max(risks), np.max(infectivities), np.min(infectivities)])
     fig.colorbar(axcontour)
-    ax.set_title('phase diagram [I, t={}]'.format(t))
+    ax.set_title('phase diagram \n [I, t={}, N={}, b={}, ob={}, k={}, I0={}]'.format(t, N, b, ob, k, infected))
     if usage == True:
-        ax.set_xlabel('Proportion of Non-Masked to Masked per Period')
-        ax.set_ylabel('Proportion of Masked to Non-Masked per Period')
+        ax.set_ylabel('Proportion of Non-Masked to Masked per Period')
+        ax.set_xlabel('Proportion of Masked to Non-Masked per Period')
     else:
         ax.set_ylabel('Risk when Masked')
         ax.set_xlabel('Infectivity when Masked')
