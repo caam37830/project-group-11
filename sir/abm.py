@@ -546,7 +546,7 @@ def move_pop(pop, p, q):
 
     tree = KDTree(X)
 
-    # Find and move susceptible agents
+    # Find and move susceptible  agents
     susceptible = get_indices(pop, 'S')
     for s in susceptible:
         pop[s].move(p)
