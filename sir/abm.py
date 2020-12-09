@@ -11,7 +11,7 @@ class Person():
     The state attribute covers the agent's relationship with the disease.
     """
 
-    def __init__(self, state='S', cohort='No Cohort', pos=np.random.uniform(0,1,2)):
+    def __init__(self, state='S', cohort='No Cohort'):
         """
         Creates an agent with a default susceptible status
         """
@@ -21,7 +21,8 @@ class Person():
 
         self.state = state
         self.cohort = cohort
-        self.pos = pos
+        random.seed()
+        self.pos = np.random.uniform(0,1,2)
 
         # Start with no mask
         self.masked = False
@@ -450,13 +451,17 @@ def new_pop(start_inf, nrow, ncol):
     return pop_grid
 
 
-def time_plot(pop, b, ob, k, t, m, u, infectivity, risk, save_path):
+def time_plot(pop, b, ob, k, t, m, u, infectivity, risk, save_path, q=0, p=0):
     """
     Runs a simulation with the given parameters and 
     Outputs a plot of the three state ratios over time t
     """
     N = pop.size
-    pop, S, I, R = abm_pop_sim(pop, b, ob, k, t, m, u, infectivity, risk)
+    if q != 0:
+        pop, S, I, R = abm_2D_sim(pop, p, q, k, t)
+    else:
+        pop, S, I, R = abm_pop_sim(pop, b, ob, k, t, m, u, infectivity, risk)
+
 
     s = np.true_divide(S, N)
     i = np.true_divide(I, N)
@@ -540,17 +545,6 @@ def move_pop(pop, p, q):
         X[i,1] = pop[i].pos[1]
 
     tree = KDTree(X)
-
-    # Find and move susceptible agents
-    susceptible = get_indices(pop, 'S')
-    for s in susceptible:
-        pop[s].move(p)
-        inds = tree.query_ball_point(pop[s].pos, q)
-
-        for j in inds:
-            if pop[j].state == 'I':
-                pop[s].infect()
-                break
 
     # Find and move infected agents
     infected = get_indices(pop, 'I')
